@@ -29,6 +29,10 @@ Now you are all ready to start creating your bot, there are a few Api keys you w
 
 
 
+
+
+**Disclaimer**
+
 3D Magic is not a financial advisor, broker, or investment professional. This trading bot is provided for educational and informational purposes only. 
 
 **By using this software, you acknowledge and agree that:**
