@@ -25,3 +25,18 @@ Once you have all the parts, I recommend to get the following software that shou
       -FileZilla = https://filezilla-project.org/
 
 Now you are all ready to start creating your bot, there are a few Api keys you will need, DO NOT SHARE THESE KEYS WITH ANYONE OTHER THAN WITH THE BOT !
+
+
+
+
+3D Magic is not a financial advisor, broker, or investment professional. This trading bot is provided for educational and informational purposes only. 
+
+**By using this software, you acknowledge and agree that:**
+
+- 3D Magic assumes **no liability** for any financial losses, gains, taxes, or damages incurred through the use of this bot
+- All trading decisions and risks are **solely your responsibility**
+- Past performance does not guarantee future results; markets involve **substantial risk of loss**
+- You should consult a **qualified financial advisor** before making investment decisions
+- This bot does not constitute **financial, legal, or tax advice**
+
+Use at your own risk. Only trade with capital you can afford to lose.
