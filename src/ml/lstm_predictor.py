@@ -1,5 +1,14 @@
 #!/usr/bin/env python3
-"""OMNIBOT v2.5 - Deep Learning Market Predictor"""
+"""
+OMNIBOT v2.5 - Deep Learning Market Predictor
+Copyright (c) 2026 3D-Magic
+
+LICENSE: Personal Use Only
+- Free for individual personal trading
+- NO sale, NO modifications, NO redistribution
+"""
+
+
 import torch
 import pandas as pd
 from typing import Dict

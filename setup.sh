@@ -1,34 +1,47 @@
 #!/bin/bash
-# OMNIBOT v2.5 - Raspberry Pi Setup Script (RUN AFTER SD CARD IS READY)
-# This script assumes Raspberry Pi OS is already installed and you can SSH in
+# OMNIBOT v2.5 - Protected Setup Script
+# Copyright (c) 2026 3D-Magic
+# LICENSE: Personal Use Only
 
 set -e
 
 echo "=========================================="
-echo "OMNIBOT v2.5 - Raspberry Pi Setup"
-echo "Running on: $(hostname)"
+echo "OMNIBOT v2.5 - Protected Setup"
 echo "=========================================="
 echo ""
 
 # Check if running on Raspberry Pi
 if [[ $(uname -m) != "aarch64" && $(uname -m) != "armv7l" ]]; then
     echo "⚠ Warning: This doesn't appear to be a Raspberry Pi"
-    echo "Continuing anyway..."
-    echo ""
+    read -p "Continue anyway? (y/n) " -n 1 -r
+    echo
+    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+        exit 1
+    fi
 fi
 
-# Update system
+echo "📜 LICENSE: Personal Use Only"
+echo "   - Free for personal trading"
+echo "   - NO modifications permitted"
+echo "   - NO redistribution allowed"
+echo ""
+read -p "Do you agree to these terms? (y/n) " -n 1 -r
+echo
+if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+    echo "Setup aborted."
+    exit 1
+fi
+
+echo ""
 echo "→ Updating system packages..."
 sudo apt update && sudo apt full-upgrade -y
 
-# Install system dependencies
 echo "→ Installing system dependencies..."
 sudo apt install -y python3-venv python3-pip python3-dev build-essential \
     libopenblas-dev liblapack-dev gfortran postgresql libpq-dev \
     redis-server git vim htop tree tmux sqlite3 libsqlite3-dev \
-    pkg-config cmake libhdf5-dev
+    pkg-config cmake libhdf5-dev openssl
 
-# Setup PostgreSQL (optional)
 echo "→ Setting up PostgreSQL..."
 sudo systemctl enable postgresql
 sudo systemctl start postgresql
@@ -42,85 +55,60 @@ echo "$DB_PASS"
 echo "=========================================="
 echo ""
 
-# Create database user and database
-sudo -u postgres psql -c "CREATE USER omnibot WITH PASSWORD '$DB_PASS';" 2>/dev/null || echo "User may already exist"
-sudo -u postgres psql -c "CREATE DATABASE omnibot_db OWNER omnibot;" 2>/dev/null || echo "Database may already exist"
+sudo -u postgres psql -c "CREATE USER omnibot WITH PASSWORD '$DB_PASS';" 2>/dev/null || true
+sudo -u postgres psql -c "CREATE DATABASE omnibot_db OWNER omnibot;" 2>/dev/null || true
 sudo -u postgres psql -c "GRANT ALL PRIVILEGES ON DATABASE omnibot_db TO omnibot;"
 
-# Setup Redis
 echo "→ Setting up Redis..."
 sudo systemctl enable redis-server
 sudo systemctl start redis-server
 
-# Create project directory
-echo "→ Creating project directory..."
-PROJECT_DIR="$HOME/omnibot-v2.5"
-mkdir -p "$PROJECT_DIR"
-cd "$PROJECT_DIR"
-
-# Create virtual environment
-echo "→ Creating Python virtual environment..."
+echo "→ Creating Python environment..."
 python3 -m venv venv
 source venv/bin/activate
 
-# Upgrade pip
-echo "→ Upgrading pip..."
+echo "→ Installing Python packages..."
 pip install --upgrade pip setuptools wheel
 
-# Install PyTorch (CPU version for Pi)
 echo "→ Installing PyTorch (this takes 10-15 minutes)..."
 pip install torch torchvision --index-url https://download.pytorch.org/whl/cpu
 
-# Install requirements
-echo "→ Installing Python packages (this takes 15-30 minutes)..."
+echo "→ Installing dependencies..."
 pip install -r requirements.txt
 
-# Download NLTK data
-echo "→ Downloading NLTK data..."
+echo "→ Downloading NLP data..."
 python -m nltk.downloader punkt vader_lexicon stopwords wordnet
 
-# Create directory structure
 echo "→ Creating directories..."
 mkdir -p models data logs backups secrets
 
-# Create .env file
-echo "→ Creating initial .env file..."
-cat > .env << EOF
-# OMNIBOT v2.5 Configuration
-# Generated: $(date -Iseconds)
-
-ALPACA_API_KEY_ENC=''
-ALPACA_SECRET_KEY_ENC=''
-NEWSAPI_KEY_ENC=''
-POLYGON_KEY_ENC=''
-
-DATABASE_URL='postgresql://omnibot:$DB_PASS@localhost:5432/omnibot_db'
-REDIS_URL='redis://localhost:6379/0'
-TRADING_MODE='paper'
-
-MODEL_PATH='./models'
-DATA_PATH='./data'
-EOF
-
-chmod 600 .env
+echo "→ Generating security hashes..."
+python -c "
+import sys
+sys.path.insert(0, 'src')
+from security.protector import LicenseProtector
+p = LicenseProtector()
+p._generate_hashes()
+print('✓ Integrity hashes generated')
+"
 
 echo ""
 echo "=========================================="
 echo "✓ SETUP COMPLETE!"
 echo "=========================================="
 echo ""
-echo "Next steps:"
-echo "1. Configure API keys:"
+echo "⚠️  IMPORTANT SECURITY NOTES:"
+echo ""
+echo "1. Change the admin password in:"
+echo "   src/security/protector.py"
+echo "   (Edit ADMIN_PASSWORD_HASH line)"
+echo ""
+echo "2. To configure API keys, run:"
 echo "   python src/main.py --setup"
+echo "   (Requires admin password)"
 echo ""
-echo "2. Test installation:"
-echo "   python src/main.py --trades"
+echo "3. The bot will NOT start if files are modified"
 echo ""
-echo "3. Start paper trading:"
-echo "   python src/main.py --mode cli"
+echo "4. Database password saved in: .env"
 echo ""
-echo "4. Install as service (optional):"
-echo "   sudo ./scripts/install-service.sh"
-echo ""
-echo "Database password saved in: $PROJECT_DIR/.env"
-echo ""
+echo "=========================================="

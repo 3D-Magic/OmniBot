@@ -1,5 +1,13 @@
 #!/usr/bin/env python3
-"""OMNIBOT v2.5 - Data Client"""
+"""
+OMNIBOT v2.5 - Data Client
+Copyright (c) 2026 3D-Magic
+
+LICENSE: Personal Use Only
+- Free for individual personal trading
+- NO sale, NO modifications, NO redistribution
+"""
+
 import pandas as pd
 
 class HybridDataClient:

@@ -1,5 +1,13 @@
 #!/usr/bin/env python3
-"""OMNIBOT v2.5 - Database Management"""
+"""
+OMNIBOT v2.5 - Database Management
+Copyright (c) 2026 3D-Magic
+
+LICENSE: Personal Use Only
+- Free for individual personal trading
+- NO sale, NO modifications, NO redistribution
+"""
+
 from sqlalchemy import create_engine, Column, String, Float, DateTime, Integer, JSON, Index
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, Session

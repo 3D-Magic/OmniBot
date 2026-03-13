@@ -1,5 +1,15 @@
 #!/usr/bin/env python3
-"""OMNIBOT v2.5 - Configuration"""
+"""
+OMNIBOT v2.5 - Configuration
+Copyright (c) 2026 3D-Magic
+
+LICENSE: Personal Use Only
+- Free for individual personal trading
+- NO sale, NO modifications, NO redistribution
+
+Unauthorized use, modification, or distribution is prohibited.
+"""
+
 from pydantic_settings import BaseSettings
 from pydantic import Field
 from typing import List

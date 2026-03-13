@@ -1,5 +1,14 @@
 #!/usr/bin/env python3
-"""OMNIBOT v2.5 - Market Regime Detection"""
+"""
+OMNIBOT v2.5 - Market Regime Detection
+Copyright (c) 2026 3D-Magic
+
+LICENSE: Personal Use Only
+- Free for individual personal trading
+- NO sale, NO modifications, NO redistribution
+"""
+
+
 from enum import Enum
 from dataclasses import dataclass
 

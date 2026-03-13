@@ -1,5 +1,13 @@
 #!/usr/bin/env python3
-"""OMNIBOT v2.5 - Trading Engine"""
+"""
+OMNIBOT v2.5 - Trading Engine
+Copyright (c) 2026 3D-Magic
+
+LICENSE: Personal Use Only
+- Free for individual personal trading
+- NO sale, NO modifications, NO redistribution
+"""
+
 import pandas as pd
 import numpy as np
 from datetime import datetime, timedelta
@@ -19,6 +27,7 @@ from ml.lstm_predictor import market_predictor
 from data.hybrid_client import data_client
 from database.manager import DatabaseManager, Trade
 from utils.monitoring import monitor
+from security.protector import protector
 
 class Position:
     def __init__(self, symbol, qty, avg_entry, stop_loss, take_profit, strategy_id):
@@ -35,6 +44,7 @@ class TradingEngineV25:
     def __init__(self, display_callback=None):
         print("=" * 70)
         print("OMNIBOT v2.5 - INTELLIGENT ADAPTIVE TRADING SYSTEM")
+        print(protector.get_license_watermark())
         print("=" * 70 + "\n")
 
         self.trading_client = TradingClient(
@@ -95,6 +105,7 @@ class TradingEngineV25:
     def trading_loop(self):
         print("\n" + "=" * 70)
         print("TRADING LOOP STARTED")
+        print(protector.get_license_watermark())
         print("=" * 70 + "\n")
 
         loop_count = 0

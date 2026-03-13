@@ -20,7 +20,7 @@ fi
 
 cat > /etc/systemd/system/omnibot.service << EOF
 [Unit]
-Description=OMNIBOT v2.5 Trading System
+Description=OMNIBOT v2.5 Trading System (Licensed)
 After=network.target postgresql.service redis.service
 
 [Service]

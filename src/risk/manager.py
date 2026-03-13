@@ -1,5 +1,13 @@
 #!/usr/bin/env python3
-"""OMNIBOT v2.5 - Risk Management"""
+"""
+OMNIBOT v2.5 - Risk Management
+Copyright (c) 2026 3D-Magic
+
+LICENSE: Personal Use Only
+- Free for individual personal trading
+- NO sale, NO modifications, NO redistribution
+"""
+
 from dataclasses import dataclass
 
 @dataclass

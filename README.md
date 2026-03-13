@@ -1,36 +1,56 @@
 # 🤖 OMNIBOT v2.5 - Raspberry Pi Trading Bot
 
 > **ML-Enhanced Trading System for Raspberry Pi**  
-> **Run AFTER SD card is flashed with Raspberry Pi OS**
+> **PROTECTED - Personal Use License**
 
-**📄 For SD card setup instructions, see: [OmniBot v2.5 Paper Trading Steps.pdf](https://github.com/3D-Magic/OmniBot/releases/download/v2.5/OmniBot.v2.5.Paper.Trading.Steps.pdf)**
+**⚠️ LICENSE NOTICE:**
+This software is FREE for personal use only. 
+- ✅ Use for your own trading
+- ❌ NO selling
+- ❌ NO modifications  
+- ❌ NO redistribution
+- ❌ NO commercial use
+- 🔒 Technical protections active
+
+**📄 For SD card setup instructions, see:** [OmniBot v2.5 Paper Trading Steps.pdf](https://github.com/3D-Magic/OmniBot/releases/download/v2.5/OmniBot.v2.5.Paper.Trading.Steps.pdf)
 
 ## ⚡ Quick Start (After SD Card is Ready)
 
 ```bash
-# 1. SSH into your Raspberry Pi (already set up with Pi OS)
+# 1. SSH into your Raspberry Pi
 ssh omnibot@omnibot.local
 
 # 2. Clone this repository
 git clone https://github.com/3D-Magic/OmniBot.git
 cd OmniBot
 
-# 3. Run setup (installs everything)
+# 3. Run setup
+chmod +x setup.sh
 ./setup.sh
 
-# 4. Configure API keys
+# 4. Configure API keys (requires admin password)
 python src/main.py --setup
 
 # 5. Start trading
 python src/main.py --mode cli
 ```
 
-## 📋 Prerequisites (Already Done)
+## 🔒 Security Features
 
-✅ **Raspberry Pi OS installed on SD card**  
-✅ **SSH enabled**  
-✅ **Network connectivity** (Ethernet or WiFi)  
-✅ **You can SSH into the Pi**
+This protected version includes:
+- **File Integrity Verification** - Bot won't start if code is modified
+- **Admin Password Protection** - Required for configuration changes
+- **License Watermarks** - Embedded in all outputs
+- **Tamper Detection** - Automatic violation detection
+
+**Admin Password:** Required for setup (contact administrator)
+
+## 📋 Prerequisites
+
+- Raspberry Pi OS installed on SD card
+- SSH enabled
+- Network connectivity
+- See PDF above for SD card setup
 
 **Hardware:**
 - Raspberry Pi 4 (4GB or 8GB RAM)
@@ -38,192 +58,39 @@ python src/main.py --mode cli
 - Power supply
 - Internet connection
 
-## 🚀 Installation Steps
+## 🚀 Installation
 
-### Step 1: Connect to Pi
-
-```bash
-# Default SSH (if you used 'omnibot' as hostname)
-ssh omnibot@omnibot.local
-
-# Or use IP address
-ssh omnibot@192.168.1.xxx
-```
-
-### Step 2: Download & Setup
+See PDF guide for detailed SD card setup. After that:
 
 ```bash
-# Download the code
 git clone https://github.com/3D-Magic/OmniBot.git
 cd OmniBot
-
-# Run automated setup (takes 30-60 minutes)
 ./setup.sh
 ```
 
-This will:
-- Update system packages
-- Install PostgreSQL & Redis
-- Create Python virtual environment
-- Install PyTorch and all ML libraries
-- Download NLP data
-- Create database with secure password
-
-### Step 3: Configure API Keys
+## 📊 Usage
 
 ```bash
-python src/main.py --setup
-```
+# Start trading
+python src/main.py --mode cli
 
-Enter:
-- **Alpaca API Key** (from [alpaca.markets](https://alpaca.markets))
-- **Alpaca Secret Key**
-- **NewsAPI Key** (optional)
-- Choose PostgreSQL or SQLite
-
-### Step 4: Test
-
-```bash
-# Check configuration
+# View trades
 python src/main.py --trades
 
-# Should show: "No trades found" (normal for fresh start)
-```
-
-### Step 5: Start Trading
-
-**Option A: Run manually**
-```bash
-python src/main.py --mode cli
-```
-
-**Option B: Install as service (runs 24/7)**
-```bash
+# Run as service
 sudo ./scripts/install-service.sh
 sudo systemctl start omnibot
 ```
 
-## 📊 Managing the Bot
+## ⚠️ License Reminder
 
-### If running as service:
+By using this software, you agree to:
+- Use ONLY for personal trading
+- NOT sell, modify, or redistribute
+- Accept all trading risks
 
-```bash
-# View status
-sudo systemctl status omnibot
-
-# Start/stop/restart
-sudo systemctl start omnibot
-sudo systemctl stop omnibot
-sudo systemctl restart omnibot
-
-# View logs
-sudo journalctl -u omnibot -f
-
-# View last 50 lines
-sudo journalctl -u omnibot -n 50
-```
-
-### View trades:
-
-```bash
-# Recent trades
-python src/main.py --trades
-
-# Last 7 days
-python src/main.py --trades --days 7
-
-# Export to CSV
-python src/main.py --trades --export trades.csv
-```
-
-## 📁 Project Structure
-
-```
-OmniBot/
-├── src/
-│   ├── config/          # Configuration management
-│   ├── database/        # Trade database & analytics
-│   ├── ml/              # LSTM predictor & regime detection
-│   ├── risk/            # Risk management
-│   ├── trading/         # Trading engine
-│   └── main.py          # Entry point
-├── scripts/
-│   └── install-service.sh  # Systemd installer
-├── setup.sh             # Main setup script
-├── requirements.txt     # Python dependencies
-└── .env                 # Your API keys (created by setup)
-```
-
-## 🔧 Configuration
-
-Edit `.env` file:
-
-```bash
-# Trading mode
-TRADING_MODE='paper'  # paper | live
-
-# Database
-DATABASE_URL='postgresql://omnibot:password@localhost:5432/omnibot_db'
-# Or use SQLite: 'sqlite:///omnibot.db'
-
-# Symbols (edit src/config/settings.py to change)
-```
-
-## 🐛 Troubleshooting
-
-**"Permission denied"**
-```bash
-chmod +x setup.sh
-chmod +x scripts/*.sh
-```
-
-**"Module not found"**
-```bash
-source venv/bin/activate
-pip install <missing-module>
-```
-
-**Database connection error**
-```bash
-# Check PostgreSQL
-sudo systemctl status postgresql
-
-# Or switch to SQLite (edit .env)
-DATABASE_URL='sqlite:///omnibot.db'
-```
-
-**Service won't start**
-```bash
-# Check logs
-sudo journalctl -u omnibot -n 50
-
-# Check permissions
-ls -la .env  # Should be -rw-------
-```
-
-## ⚠️ Safety First
-
-- ✅ **Start with PAPER trading**
-- ✅ **Test for weeks before going live**
-- ✅ **Never risk money you can't afford to lose**
-- ✅ **Keep API keys secret** (never commit .env)
-- ✅ **Monitor logs regularly**
-
-## 📚 Documentation
-
-- `commands.sh` - Quick command reference
-- Check `src/config/settings.py` for trading parameters
-- Alpaca Dashboard: https://app.alpaca.markets/paper/dashboard
-
-## 🤝 Support
-
-Open an issue on GitHub with:
-- Error messages from logs
-- `uname -a` output
-- Python version: `python3 --version`
+See LICENSE file for complete terms.
 
 ---
 
 **Ready to trade! 🚀**
-
-
