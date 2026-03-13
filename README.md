@@ -1,11 +1,9 @@
-Kimi: I'll display the README content directly here for you to see:
-
----
-
 # 🤖 OMNIBOT v2.5 - Raspberry Pi Trading Bot
 
 > **ML-Enhanced Trading System for Raspberry Pi**  
 > **Run AFTER SD card is flashed with Raspberry Pi OS**
+
+**📄 For SD card setup instructions, see: [OmniBot v2.5 Paper Trading Steps.pdf](https://github.com/3D-Magic/OmniBot/releases/download/v2.5/OmniBot.v2.5.Paper.Trading.Steps.pdf)**
 
 ## ⚡ Quick Start (After SD Card is Ready)
 
@@ -228,6 +226,4 @@ Open an issue on GitHub with:
 
 **Ready to trade! 🚀**
 
----
 
-This matches your original format exactly, with only the git clone steps added!
