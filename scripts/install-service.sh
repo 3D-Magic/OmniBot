@@ -1,20 +1,13 @@
 #!/bin/bash
 # Install OMNIBOT v2.5 as systemd service
-# Run this AFTER setup.sh is complete
 
 if [ "$EUID" -ne 0 ]; then 
     echo "Please run as root (use sudo)"
     exit 1
 fi
 
-# Get the user who ran sudo
-if [ -z "$SUDO_USER" ]; then
-    echo "Error: Could not determine user. Run with sudo."
-    exit 1
-fi
-
-USERNAME=$SUDO_USER
-INSTALL_DIR="/home/$USERNAME/omnibot-v2.5"
+USERNAME=${SUDO_USER:-$USER}
+INSTALL_DIR="/home/$USERNAME/OmniBot"
 
 echo "Installing OMNIBOT v2.5 service..."
 echo "User: $USERNAME"
@@ -22,11 +15,9 @@ echo "Directory: $INSTALL_DIR"
 
 if [ ! -d "$INSTALL_DIR" ]; then
     echo "Error: Directory $INSTALL_DIR not found!"
-    echo "Run setup.sh first."
     exit 1
 fi
 
-# Create systemd service file
 cat > /etc/systemd/system/omnibot.service << EOF
 [Unit]
 Description=OMNIBOT v2.5 Trading System
@@ -51,7 +42,6 @@ StartLimitBurst=3
 WantedBy=multi-user.target
 EOF
 
-# Reload and enable
 systemctl daemon-reload
 systemctl enable omnibot.service
 
@@ -64,4 +54,3 @@ echo "  Stop:    sudo systemctl stop omnibot"
 echo "  Status:  sudo systemctl status omnibot"
 echo "  Logs:    sudo journalctl -u omnibot -f"
 echo ""
-echo "To start now: sudo systemctl start omnibot"

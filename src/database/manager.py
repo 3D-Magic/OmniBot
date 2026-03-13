@@ -1,8 +1,5 @@
 #!/usr/bin/env python3
-"""
-OMNIBOT v2.5 - Database Management
-PostgreSQL with SQLite fallback
-"""
+"""OMNIBOT v2.5 - Database Management"""
 from sqlalchemy import create_engine, Column, String, Float, DateTime, Integer, JSON, Index
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, Session

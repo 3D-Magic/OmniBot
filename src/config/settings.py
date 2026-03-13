@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-"""
-OMNIBOT v2.5 - Configuration
-"""
+"""OMNIBOT v2.5 - Configuration"""
 from pydantic_settings import BaseSettings
 from pydantic import Field
 from typing import List
@@ -38,14 +36,6 @@ class SecureSettings(BaseSettings):
     @property
     def alpaca_secret_key(self) -> str:
         return self.alpaca_secret_key_enc if self.alpaca_secret_key_enc else ""
-
-    @property
-    def newsapi_key(self) -> str:
-        return self.newsapi_key_enc if self.newsapi_key_enc else ""
-
-    @property
-    def polygon_key(self) -> str:
-        return self.polygon_key_enc if self.polygon_key_enc else ""
 
 class TradingConfig(BaseSettings):
     """Trading parameters"""

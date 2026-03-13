@@ -1,5 +1,4 @@
 # OMNIBOT v2.5 Dependencies
-# Install with: pip install -r requirements.txt
 
 # Core Trading & Data
 alpaca-py>=0.8.0
@@ -41,7 +40,7 @@ h5py>=3.9.0
 joblib>=1.3.0
 tqdm>=4.65.0
 
-# Critical Missing Packages
+# Critical Packages
 hmmlearn>=0.3.0
 typing-extensions>=4.7.0
 pydantic-core>=2.0.0

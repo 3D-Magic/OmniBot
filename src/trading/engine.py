@@ -102,7 +102,6 @@ class TradingEngineV25:
             try:
                 loop_count += 1
 
-                # Check market hours
                 try:
                     clock = self.trading_client.get_clock()
                     if not clock.is_open and trading_config.market_open_only:
@@ -111,7 +110,6 @@ class TradingEngineV25:
                 except:
                     pass
 
-                # Periodic status
                 if loop_count % 12 == 0:
                     account = self.get_account()
                     print(f"[{datetime.now().strftime('%H:%M:%S')}] "
