@@ -1,42 +1,225 @@
-# **OmniBot**
-This is a trading bot that essentially has been setup to enable stock trading with little to no understanding of the markets, the aim is to assist on making more people finacially free.
+# 🤖 OMNIBOT v2.5 - Raspberry Pi Trading Bot
 
-There are a couple of things you will need for this to be a true standalone trading bot.
+> **ML-Enhanced Trading System for Raspberry Pi**  
+> **Run AFTER SD card is flashed with Raspberry Pi OS**
 
-First, a Raspberry Pi 5, this has to be a 8GB or higher to start off with, the link below is for NZ specifically:
-    https://www.pbtech.co.nz/product/SEVRBP0501/Raspberry-Pi-5-4GB-LPDDR4-24GHz-Quad-Core-ARM-Cort?srsltid=AfmBOooOT7yyMCvU0r2I3YXcR7kokBJbJJywFZ_JUY-14phXb73SuroM
+## ⚡ Quick Start (After SD Card is Ready)
 
-Secondly, is the Pi5 active cooling unit:
-    http://aliexpress.com/item/1005006398301793.html?spm=a2g0o.order_list.order_list_main.5.402f1802fc4OOx
+```bash
+# 1. SSH into your Raspberry Pi (already set up with Pi OS)
+ssh omnibot@omnibot.local
 
-Then a case for the pi5, I just 3D printed the case for ease, but the link below offers a premade case:
-    http://aliexpress.com/item/1005006398301793.html?spm=a2g0o.order_list.order_list_main.5.402f1802fc4OOx
+# 2. Clone this repository
+git clone https://github.com/yourusername/omnibot-v2.5.git
+cd omnibot-v2.5
 
-Then you need a SD card, this has to be a minimum of 64GB but would recommend a 128GB
-    https://www.pbtech.co.nz/product/MEMADC20020/ADATA-Premier-microSDXC-Memory-Card---64GB-Include
+# 3. Run setup (installs everything)
+./setup.sh
 
-Then I have added a capability for Graphical User Interface, but this does need a screen (the Bot does not need a screen, but it is just a nice touch):
-    https://www.aliexpress.com/item/1005006739026067.html?spm=a2g0o.productlist.main.28.1f2diPS0iPS0LV&aem_p4p_detail=20260228043615570258771482880013536554&algo_pvid=0f68af11-9fa5-4e19-84fc-3f044b77e4c2&algo_exp_id=0f68af11-9fa5-4e19-84fc-3f044b77e4c2-27&pdp_ext_f=%7B%22order%22%3A%221580%22%2C%22spu_best_type%22%3A%22price%22%2C%22eval%22%3A%221%22%2C%22fromPage%22%3A%22search%22%7D&pdp_npi=6%40dis%21NZD%21178.95%2164.68%21%21%21719.24%21259.94%21%402103123917722821752071878e6550%2112000038141306666%21sea%21NZ%211777764455%21X%211%210%21n_tag%3A-29919%3Bd%3A1f9c8084%3Bm03_new_user%3A-29895&curPageLogUid=78HoGb0wZceA&utparam-url=scene%3Asearch%7Cquery_from%3A%7Cx_object_id%3A1005006739026067%7C_p_origin_prod%3A&search_p4p_id=20260228043615570258771482880013536554_8
+# 4. Configure API keys
+python src/main.py --setup
 
+# 5. Start trading
+python src/main.py --mode cli
+```
 
-Once you have all the parts, I recommend to get the following software that should enable you to program the Pi
-      -Raspberry Pi Imager = https://www.raspberrypi.com/software/
-      -Putty = https://putty.org/index.html
-      -FileZilla = https://filezilla-project.org/
+## 📋 Prerequisites (Already Done)
 
-Now you are all ready to start creating your bot, there are a few Api keys you will need, DO NOT SHARE THESE KEYS WITH ANYONE OTHER THAN WITH THE BOT !
+✅ **Raspberry Pi OS installed on SD card**  
+✅ **SSH enabled**  
+✅ **Network connectivity** (Ethernet or WiFi)  
+✅ **You can SSH into the Pi**
 
+**Hardware:**
+- Raspberry Pi 4 (4GB or 8GB RAM)
+- MicroSD Card (32GB+, Class 10)
+- Power supply
+- Internet connection
 
-**Disclaimer**
+## 🚀 Installation Steps
 
-3D Magic is not a financial advisor, broker, or investment professional. This trading bot is provided for educational and informational purposes only. 
+### Step 1: Connect to Pi
 
-**By using this software, you acknowledge and agree that:**
+```bash
+# Default SSH (if you used 'omnibot' as hostname)
+ssh omnibot@omnibot.local
 
-- 3D Magic assumes **no liability** for any financial losses, gains, taxes, or damages incurred through the use of this bot
-- All trading decisions and risks are **solely your responsibility**
-- Past performance does not guarantee future results; markets involve **substantial risk of loss**
-- You should consult a **qualified financial advisor** before making investment decisions
-- This bot does not constitute **financial, legal, or tax advice**
+# Or use IP address
+ssh omnibot@192.168.1.xxx
+```
 
-Use at your own risk. Only trade with capital you can afford to lose.
+### Step 2: Download & Setup
+
+```bash
+# Download the code
+git clone https://github.com/yourusername/omnibot-v2.5.git
+cd omnibot-v2.5
+
+# Run automated setup (takes 30-60 minutes)
+./setup.sh
+```
+
+This will:
+- Update system packages
+- Install PostgreSQL & Redis
+- Create Python virtual environment
+- Install PyTorch and all ML libraries
+- Download NLP data
+- Create database with secure password
+
+### Step 3: Configure API Keys
+
+```bash
+python src/main.py --setup
+```
+
+Enter:
+- **Alpaca API Key** (from [alpaca.markets](https://alpaca.markets))
+- **Alpaca Secret Key**
+- **NewsAPI Key** (optional)
+- Choose PostgreSQL or SQLite
+
+### Step 4: Test
+
+```bash
+# Check configuration
+python src/main.py --trades
+
+# Should show: "No trades found" (normal for fresh start)
+```
+
+### Step 5: Start Trading
+
+**Option A: Run manually**
+```bash
+python src/main.py --mode cli
+```
+
+**Option B: Install as service (runs 24/7)**
+```bash
+sudo ./scripts/install-service.sh
+sudo systemctl start omnibot
+```
+
+## 📊 Managing the Bot
+
+### If running as service:
+
+```bash
+# View status
+sudo systemctl status omnibot
+
+# Start/stop/restart
+sudo systemctl start omnibot
+sudo systemctl stop omnibot
+sudo systemctl restart omnibot
+
+# View logs
+sudo journalctl -u omnibot -f
+
+# View last 50 lines
+sudo journalctl -u omnibot -n 50
+```
+
+### View trades:
+
+```bash
+# Recent trades
+python src/main.py --trades
+
+# Last 7 days
+python src/main.py --trades --days 7
+
+# Export to CSV
+python src/main.py --trades --export trades.csv
+```
+
+## 📁 Project Structure
+
+```
+omnibot-v2.5/
+├── src/
+│   ├── config/          # Configuration management
+│   ├── database/        # Trade database & analytics
+│   ├── ml/              # LSTM predictor & regime detection
+│   ├── risk/            # Risk management
+│   ├── trading/         # Trading engine
+│   └── main.py          # Entry point
+├── scripts/
+│   └── install-service.sh  # Systemd installer
+├── setup.sh             # Main setup script
+├── requirements.txt     # Python dependencies
+└── .env                 # Your API keys (created by setup)
+```
+
+## 🔧 Configuration
+
+Edit `.env` file:
+
+```bash
+# Trading mode
+TRADING_MODE='paper'  # paper | live
+
+# Database
+DATABASE_URL='postgresql://omnibot:password@localhost:5432/omnibot_db'
+# Or use SQLite: 'sqlite:///omnibot.db'
+
+# Symbols (edit src/config/settings.py to change)
+```
+
+## 🐛 Troubleshooting
+
+**"Permission denied"**
+```bash
+chmod +x setup.sh
+chmod +x scripts/*.sh
+```
+
+**"Module not found"**
+```bash
+source venv/bin/activate
+pip install <missing-module>
+```
+
+**Database connection error**
+```bash
+# Check PostgreSQL
+sudo systemctl status postgresql
+
+# Or switch to SQLite (edit .env)
+DATABASE_URL='sqlite:///omnibot.db'
+```
+
+**Service won't start**
+```bash
+# Check logs
+sudo journalctl -u omnibot -n 50
+
+# Check permissions
+ls -la .env  # Should be -rw-------
+```
+
+## ⚠️ Safety First
+
+- ✅ **Start with PAPER trading**
+- ✅ **Test for weeks before going live**
+- ✅ **Never risk money you can't afford to lose**
+- ✅ **Keep API keys secret** (never commit .env)
+- ✅ **Monitor logs regularly**
+
+## 📚 Documentation
+
+- `commands.sh` - Quick command reference
+- Check `src/config/settings.py` for trading parameters
+- Alpaca Dashboard: https://app.alpaca.markets/paper/dashboard
+
+## 🤝 Support
+
+Open an issue on GitHub with:
+- Error messages from logs
+- `uname -a` output
+- Python version: `python3 --version`
+
+---
+
+**Ready to trade! 🚀**
