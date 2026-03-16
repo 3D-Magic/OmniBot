@@ -1,1 +1,1 @@
-from .manager import DatabaseManager, Trade
+from .manager import DatabaseManager, db_manager, TradeModel

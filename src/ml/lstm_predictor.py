@@ -1,19 +1,15 @@
 #!/usr/bin/env python3
 """
 OMNIBOT v2.5 - Deep Learning Market Predictor
-Copyright (c) 2026 3D-Magic
-
-LICENSE: Personal Use Only
-- Free for individual personal trading
-- NO sale, NO modifications, NO redistribution
 """
-
-
 import torch
+import torch.nn as nn
+import numpy as np
 import pandas as pd
-from typing import Dict
+from typing import List, Dict, Optional
 from datetime import datetime
 from dataclasses import dataclass
+
 
 @dataclass
 class PredictionResult:
@@ -23,13 +19,19 @@ class PredictionResult:
     features_importance: Dict[str, float]
     timestamp: datetime
 
+
 class MarketPredictor:
-    def __init__(self, model_path: str = "./models"):
+    """Deep learning market prediction system"""
+
+    def __init__(self, model_path: str = "/home/Omnibot/omnibot/models"):
         self.model_path = model_path
         self.device = torch.device('cpu')
-        print("✓ LSTM model initialized")
+        print("Created new LSTM model")
 
     def predict(self, symbol: str, df: pd.DataFrame) -> PredictionResult:
+        """Generate prediction for symbol"""
+        # Placeholder implementation - returns neutral prediction
+        # In production, this would load and run the actual LSTM model
         return PredictionResult(
             direction='neutral',
             confidence=0.5,
@@ -37,5 +39,6 @@ class MarketPredictor:
             features_importance={},
             timestamp=datetime.now()
         )
+
 
 market_predictor = MarketPredictor()

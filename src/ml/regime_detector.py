@@ -1,16 +1,11 @@
 #!/usr/bin/env python3
 """
 OMNIBOT v2.5 - Market Regime Detection
-Copyright (c) 2026 3D-Magic
-
-LICENSE: Personal Use Only
-- Free for individual personal trading
-- NO sale, NO modifications, NO redistribution
 """
-
-
 from enum import Enum
+from typing import Dict
 from dataclasses import dataclass
+
 
 class MarketRegime(Enum):
     STRONG_UPTREND = "strong_uptrend"
@@ -18,7 +13,10 @@ class MarketRegime(Enum):
     RANGING = "ranging"
     WEAK_DOWNTREND = "weak_downtrend"
     STRONG_DOWNTREND = "strong_downtrend"
+    HIGH_VOLATILITY = "high_volatility"
+    LOW_VOLATILITY = "low_volatility"
     UNKNOWN = "unknown"
+
 
 @dataclass
 class RegimeMetrics:
@@ -27,8 +25,13 @@ class RegimeMetrics:
     volatility: float = 0.0
     trend_strength: float = 0.0
 
+
 class RegimeDetector:
+    """Market regime detection"""
+
     def detect(self, prices, volume=None):
+        # Placeholder implementation
         return RegimeMetrics(regime=MarketRegime.UNKNOWN)
+
 
 regime_detector = RegimeDetector()

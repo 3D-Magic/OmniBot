@@ -1,14 +1,10 @@
 #!/usr/bin/env python3
 """
 OMNIBOT v2.5 - Risk Management
-Copyright (c) 2026 3D-Magic
-
-LICENSE: Personal Use Only
-- Free for individual personal trading
-- NO sale, NO modifications, NO redistribution
 """
-
 from dataclasses import dataclass
+from typing import Dict, List, Tuple
+
 
 @dataclass
 class RiskProfile:
@@ -16,7 +12,10 @@ class RiskProfile:
     max_sector_exposure: float = 0.40
     max_daily_drawdown: float = 0.02
 
+
 class RiskManager:
+    """Risk management system"""
+
     def __init__(self, config=None):
         self.config = config or RiskProfile()
 
@@ -24,11 +23,13 @@ class RiskManager:
         return True, "Risk check passed", {}
 
     def calculate_position_size(self, entry_price, stop_price, account_equity,
-                                volatility=0.02, signal_strength=0.5):
+                                volatility, signal_strength, kelly_fraction=0.5,
+                                ml_confidence=0.5):
         risk_amount = account_equity * 0.02
-        risk_per_share = abs(entry_price - stop_price) or (entry_price * 0.02)
+        risk_per_share = abs(entry_price - stop_price) or 0.01
         shares = int(risk_amount / risk_per_share)
         max_shares = int((account_equity * 0.15) / entry_price)
         return min(shares, max_shares)
+
 
 risk_manager = RiskManager()

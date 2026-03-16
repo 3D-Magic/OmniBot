@@ -1,1 +1,1 @@
-# GUI module placeholder
+# GUI module - placeholder for now
