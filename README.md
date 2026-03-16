@@ -19,7 +19,7 @@ An ML-enhanced, multi-strategy algorithmic trading bot designed for Raspberry Pi
 ## 📋 Requirements
 
 ### Hardware
-- Raspberry Pi 4 (4GB or 8GB RAM recommended)
+- Raspberry Pi 4 (8GB or more RAM recommended)
 - MicroSD card (32GB or larger, Class 10)
 - Ethernet cable or WiFi connection
 - Power supply for Raspberry Pi
