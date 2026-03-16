@@ -4,7 +4,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Alpaca](https://img.shields.io/badge/Alpaca-Paper%20Trading-green.svg)](https://alpaca.markets/)
 
-An ML-enhanced, multi-strategy algorithmic trading bot designed for Raspberry Pi 4, featuring deep learning market prediction, risk management, and automated paper trading.
+An ML-enhanced, multi-strategy algorithmic trading bot designed for Raspberry Pi 4 or higher with a minimum 8 GB RAM, featuring deep learning market prediction, risk management, and automated paper trading.
 
 ## 🚀 Features
 
