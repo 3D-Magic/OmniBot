@@ -34,78 +34,33 @@ An ML-enhanced, multi-strategy algorithmic trading bot designed for Raspberry Pi
 
 ### 1. Clone Repository
 ```bash
-git clone https://github.com/yourusername/omnibot-v2.5.git
+git clone https://github.com/YOUR_USERNAME/omnibot-v2.5.git
 cd omnibot-v2.5
 ```
 
-### 2. Install System Dependencies
+### 2. Run Automated Setup
 ```bash
-sudo apt update && sudo apt full-upgrade -y
-sudo apt install -y python3-venv python3-pip python3-dev build-essential     libopenblas-dev liblapack-dev gfortran postgresql libpq-dev     redis-server git vim htop tree tmux sqlite3 libsqlite3-dev     pkg-config cmake libhdf5-dev
+bash setup.sh
 ```
 
-### 3. Setup Database
+### 3. Add Your API Keys
 ```bash
-# Generate password
-openssl rand -base64 32
-
-# Create database
-sudo systemctl enable postgresql
-sudo systemctl start postgresql
-sudo -u postgres psql <<EOF
-CREATE USER Omnibot WITH PASSWORD 'YOUR_DB_PASSWORD_HERE';
-CREATE DATABASE omnibot_db OWNER Omnibot;
-GRANT ALL PRIVILEGES ON DATABASE omnibot_db TO Omnibot;
-\q
-EOF
-```
-
-### 4. Setup Redis
-```bash
-sudo systemctl enable redis-server
-sudo systemctl start redis-server
-```
-
-### 5. Create Directory Structure
-```bash
-mkdir -p ~/omnibot/{src/{config,data,database,ml,risk,trading,utils,gui,tests},logs,data,secrets,models,backups}
-cd ~/omnibot
-```
-
-### 6. Install Python Dependencies
-```bash
-python3 -m venv venv
-source venv/bin/activate
-pip install --upgrade pip setuptools wheel
-pip install torch torchvision --index-url https://download.pytorch.org/whl/cpu
-pip install -r requirements.txt
-python -m nltk.downloader punkt vader_lexicon stopwords wordnet
-```
-
-### 7. Configure API Keys
-```bash
-# Copy example config
-cp .env.example .env
-
-# Edit with your keys
-nano .env
+nano ~/omnibot/.env
 ```
 
 Fill in your Alpaca API keys from [https://alpaca.markets](https://alpaca.markets)
 
-### 8. Copy Source Files
+### 4. Test
 ```bash
-cp -r src/* ~/omnibot/src/
+python test_system.py
 ```
 
-### 9. Install Systemd Service
+### 5. Start Trading
 ```bash
-sudo cp omnibot-v2.5.service /etc/systemd/system/
-sudo chmod 644 /etc/systemd/system/omnibot-v2.5.service
-sudo systemctl daemon-reload
-sudo systemctl enable omnibot-v2.5.service
 sudo systemctl start omnibot-v2.5.service
 ```
+
+**That's it!** The bot will automatically start trading when the US market opens.
 
 ## 🎯 Usage
 
@@ -235,17 +190,9 @@ sudo journalctl -u omnibot-v2.5.service -n 50
 - **Risk**: 3% stop loss, 6% take profit per trade
 - **Trading Hours**: US Market (9:30 AM - 4:00 PM ET)
 
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
-
 ## 📝 License
 
-Distributed under the MIT License. See `LICENSE` for more information.
+Distributed under the Personal Use License. See `LICENSE` for more information.
 
 ## 🙏 Acknowledgments
 
