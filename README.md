@@ -34,8 +34,8 @@ An ML-enhanced, multi-strategy algorithmic trading bot designed for Raspberry Pi
 
 ### 1. Clone Repository
 ```bash
-git clone https://github.com/YOUR_USERNAME/omnibot-v2.5.git
-cd omnibot-v2.5
+git clone https://github.com/3D-Magic/OmniBot.git
+cd OmniBot
 ```
 
 ### 2. Run Automated Setup
