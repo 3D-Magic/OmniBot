@@ -4,7 +4,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Alpaca](https://img.shields.io/badge/Alpaca-Paper%20Trading-green.svg)](https://alpaca.markets/)
 
-An ML-enhanced, multi-strategy algorithmic trading bot designed for Raspberry Pi 4 or higher with a minimum 8 GB RAM, featuring deep learning market prediction, risk management, and automated paper trading.
+An ML-enhanced, multi-strategy algorithmic trading bot designed for Raspberry Pi 4, featuring deep learning market prediction, risk management, and automated paper trading.
 
 ## 🚀 Features
 
@@ -19,7 +19,7 @@ An ML-enhanced, multi-strategy algorithmic trading bot designed for Raspberry Pi
 ## 📋 Requirements
 
 ### Hardware
-- Raspberry Pi 4 (8GB or more RAM recommended)
+- Raspberry Pi 4 (4GB or 8GB RAM recommended)
 - MicroSD card (32GB or larger, Class 10)
 - Ethernet cable or WiFi connection
 - Power supply for Raspberry Pi
@@ -30,37 +30,111 @@ An ML-enhanced, multi-strategy algorithmic trading bot designed for Raspberry Pi
 - PostgreSQL 13+
 - Redis 6+
 
-## 🛠️ Installation
+## 🛠️ Quick Start (5 Steps)
 
-### 1. Clone Repository
-```bash
-git clone https://github.com/3D-Magic/OmniBot.git
-cd OmniBot
-```
+Get up and running in minutes:
 
-### 2. Run Automated Setup
 ```bash
+# 1. Clone your repo
+git clone https://github.com/YOUR_USERNAME/omnibot-v2.5.git
+cd omnibot-v2.5
+
+# 2. Run automated setup
 bash setup.sh
+
+# 3. Add your API keys
+nano ~/omnibot/.env
+
+# 4. Test the installation
+python test_system.py
+
+# 5. Start trading
+sudo systemctl start omnibot-v2.5.service
 ```
 
-### 3. Add Your API Keys
+**That's it!** The bot will automatically start trading when the US market opens (9:30 AM ET / 3:30 PM NZDT).
+
+## 📊 Detailed Installation Guide
+
+If the quick start doesn't work, or you want to understand each step:
+
+### Step 1: Clone Repository
 ```bash
-nano ~/omnibot/.env
+git clone https://github.com/yourusername/omnibot-v2.5.git
+cd omnibot-v2.5
+```
+
+### Step 2: Install System Dependencies
+```bash
+sudo apt update && sudo apt full-upgrade -y
+sudo apt install -y python3-venv python3-pip python3-dev build-essential \
+    libopenblas-dev liblapack-dev gfortran postgresql libpq-dev \
+    redis-server git vim htop tree tmux sqlite3 libsqlite3-dev \
+    pkg-config cmake libhdf5-dev
+```
+
+### Step 3: Setup Database
+```bash
+# Generate password
+openssl rand -base64 32
+
+# Create database
+sudo systemctl enable postgresql
+sudo systemctl start postgresql
+sudo -u postgres psql <<EOF
+CREATE USER Omnibot WITH PASSWORD 'YOUR_DB_PASSWORD_HERE';
+CREATE DATABASE omnibot_db OWNER Omnibot;
+GRANT ALL PRIVILEGES ON DATABASE omnibot_db TO Omnibot;
+\q
+EOF
+```
+
+### Step 4: Setup Redis
+```bash
+sudo systemctl enable redis-server
+sudo systemctl start redis-server
+```
+
+### Step 5: Create Directory Structure
+```bash
+mkdir -p ~/omnibot/{src/{config,data,database,ml,risk,trading,utils,gui,tests},logs,data,secrets,models,backups}
+cd ~/omnibot
+```
+
+### Step 6: Install Python Dependencies
+```bash
+python3 -m venv venv
+source venv/bin/activate
+pip install --upgrade pip setuptools wheel
+pip install torch torchvision --index-url https://download.pytorch.org/whl/cpu
+pip install -r requirements.txt
+python -m nltk.downloader punkt vader_lexicon stopwords wordnet
+```
+
+### Step 7: Configure API Keys
+```bash
+# Copy example config
+cp .env.example .env
+
+# Edit with your keys
+nano .env
 ```
 
 Fill in your Alpaca API keys from [https://alpaca.markets](https://alpaca.markets)
 
-### 4. Test
+### Step 8: Copy Source Files
 ```bash
-python test_system.py
+cp -r src/* ~/omnibot/src/
 ```
 
-### 5. Start Trading
+### Step 9: Install Systemd Service
 ```bash
+sudo cp omnibot-v2.5.service /etc/systemd/system/
+sudo chmod 644 /etc/systemd/system/omnibot-v2.5.service
+sudo systemctl daemon-reload
+sudo systemctl enable omnibot-v2.5.service
 sudo systemctl start omnibot-v2.5.service
 ```
-
-**That's it!** The bot will automatically start trading when the US market opens.
 
 ## 🎯 Usage
 
@@ -190,9 +264,17 @@ sudo journalctl -u omnibot-v2.5.service -n 50
 - **Risk**: 3% stop loss, 6% take profit per trade
 - **Trading Hours**: US Market (9:30 AM - 4:00 PM ET)
 
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
+
 ## 📝 License
 
-Distributed under the Personal Use License. See `LICENSE` for more information.
+Distributed under the MIT License. See `LICENSE` for more information.
 
 ## 🙏 Acknowledgments
 
