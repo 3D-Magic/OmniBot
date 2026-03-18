@@ -1,19 +1,16 @@
 #!/usr/bin/env python3
 """
-OMNIBOT v3.0 - Data Client (Legacy compatibility)
+OMNIBOT v2.5.1 - Data Client
 """
 import pandas as pd
 import yfinance as yf
 
 
 class HybridDataClient:
-    """Data client using Yahoo Finance"""
-
     def __init__(self):
         self.has_credentials = True
 
     def get_bars(self, symbol: str, limit: int = 100, timeframe: str = '5m'):
-        """Get price bars from Yahoo Finance"""
         try:
             ticker = yf.Ticker(symbol)
             df = ticker.history(period="3d", interval="5m")

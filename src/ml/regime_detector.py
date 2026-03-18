@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-OMNIBOT v3.0 - Market Regime Detection
+OMNIBOT v2.5.1 - Market Regime Detection
 """
 from enum import Enum
 from dataclasses import dataclass
@@ -16,8 +16,6 @@ class RegimeMetrics:
 
 
 class RegimeDetector:
-    """Market regime detector"""
-
     def detect(self, prices, volume=None):
         return RegimeMetrics(regime=MarketRegime.UNKNOWN)
 

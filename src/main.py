@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-OMNIBOT v3.0 - Main Entry Point
+OMNIBOT v2.5.1 - Main Entry Point
 """
 import sys
 import argparse
@@ -25,6 +25,8 @@ def check_configuration():
         print("\n❌ Configuration Errors:")
         for e in errors:
             print(f" - {e}")
+        print("\nRun setup.sh to configure:")
+        print("  bash setup.sh")
         return False
     return True
 
@@ -32,7 +34,7 @@ def check_configuration():
 def show_trades(days=2, symbol=None, export=None):
     """Show recent trades"""
     print(f"\n{'='*80}")
-    print(f"OMNIBOT v3.0 - Trade History (Last {days} Days)")
+    print(f"OMNIBOT v2.5.1 - Trade History (Last {days} Days)")
     print(f"{'='*80}\n")
 
     try:
@@ -81,7 +83,7 @@ def run_cli():
     from trading.engine import TradingEngineV25
 
     print("\n" + "="*70)
-    print("OMNIBOT v3.0 - WORKING Trading Engine")
+    print("OMNIBOT v2.5.1 - Intelligent Adaptive Trading System")
     print("="*70 + "\n")
 
     if not check_configuration():
@@ -96,7 +98,7 @@ def run_cli():
 
 
 def main():
-    parser = argparse.ArgumentParser(description='OMNIBOT v3.0')
+    parser = argparse.ArgumentParser(description='OMNIBOT v2.5.1')
     parser.add_argument('--trades', action='store_true', help='Show trades')
     parser.add_argument('--days', type=int, default=2, help='Days of history')
     parser.add_argument('--symbol', type=str, default=None, help='Filter symbol')

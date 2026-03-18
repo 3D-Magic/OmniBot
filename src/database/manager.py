@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-OMNIBOT v3.0 - Database Management
+OMNIBOT v2.5.1 - Database Management
 """
 from sqlalchemy import create_engine, Column, String, Float, DateTime, Integer, Index
 from sqlalchemy.ext.declarative import declarative_base
@@ -12,13 +12,13 @@ from typing import List, Dict, Optional, Any
 import pandas as pd
 from dataclasses import dataclass, asdict
 import uuid
+import sys
 
 Base = declarative_base()
 
 
 class TradeModel(Base):
     __tablename__ = 'trades'
-
     id = Column(String(36), primary_key=True)
     symbol = Column(String(10), index=True, nullable=False)
     side = Column(String(4), nullable=False)
@@ -32,14 +32,9 @@ class TradeModel(Base):
     exit_reason = Column(String(50))
     strategy_id = Column(String(50))
 
-    __table_args__ = (
-        Index('idx_trades_symbol_time', 'symbol', 'entry_time'),
-    )
-
 
 @dataclass
 class Trade:
-    """Trade dataclass"""
     id: str
     symbol: str
     side: str
@@ -51,12 +46,10 @@ class Trade:
     pnl: float = 0.0
     pnl_pct: float = 0.0
     exit_reason: str = ""
-    strategy_id: str = "v3.0"
+    strategy_id: str = "v2.5.1"
 
 
 class DatabaseManager:
-    """Database manager"""
-
     def __init__(self, connection_string: str):
         self.connection_string = connection_string
         self.engine = create_engine(
@@ -105,12 +98,7 @@ class DatabaseManager:
             ).all()
 
             if not trades:
-                return {
-                    'period_days': days,
-                    'total_trades': 0,
-                    'win_rate': 0.0,
-                    'total_pnl': 0.0
-                }
+                return {'period_days': days, 'total_trades': 0, 'win_rate': 0.0, 'total_pnl': 0.0}
 
             completed = [t for t in trades if t.exit_time is not None]
             wins = sum(1 for t in completed if t.pnl > 0)
@@ -125,8 +113,6 @@ class DatabaseManager:
             }
 
 
-# Initialize with SQLite for simplicity
-import sys
 sys.path.insert(0, '/home/biqu/omnibot/src')
 from config.settings import secure_settings
 db_manager = DatabaseManager(secure_settings.database_url)

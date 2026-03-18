@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-OMNIBOT v3.0 - ML Predictor (Placeholder)
+OMNIBOT v2.5.1 - ML Predictor
 """
 import pandas as pd
 from typing import Dict
@@ -18,8 +18,6 @@ class PredictionResult:
 
 
 class MarketPredictor:
-    """ML predictor placeholder"""
-
     def __init__(self, model_path: str = "/home/biqu/omnibot/models"):
         self.model_path = model_path
 

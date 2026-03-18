@@ -1,19 +1,20 @@
-# OmniBot v2.5 - Working Trading System
+# OmniBot v2.5.1 - Intelligent Adaptive Trading System
 
 [![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![License: Personal Use](https://img.shields.io/badge/License-Personal%20Use-orange.svg)](#license)
 [![Alpaca](https://img.shields.io/badge/Alpaca-Paper%20Trading-green.svg)](https://alpaca.markets/)
 
-An ML-enhanced, multi-strategy algorithmic trading bot designed for Raspberry Pi 4, featuring RSI-based market signals, automated risk management, and paper trading.
+An ML-enhanced, multi-strategy algorithmic trading bot designed for Raspberry Pi 4, featuring automated weekend updates, RSI-based market signals, and hands-free operation.
 
 ## 🚀 Features
 
+- **Automated Weekend Updates**: Bot automatically updates itself when market is closed
 - **RSI-Based Trading**: Mean reversion strategy with RSI < 40 entry, RSI > 60 exit
 - **Risk Management**: Automatic 3% stop-loss and 6% take-profit
 - **Multi-Asset Support**: Trade 13 popular symbols (TQQQ, SOXL, TSLA, NVDA, etc.)
 - **Paper Trading**: Test strategies risk-free with Alpaca paper trading
 - **24/7 Operation**: Systemd service for automatic startup and monitoring
-- **Weekend Updates**: Safe update mechanism that preserves API keys
+- **Self-Healing**: Auto-restart on errors, auto-update on weekends
 
 ## 📋 Requirements
 
@@ -31,7 +32,7 @@ An ML-enhanced, multi-strategy algorithmic trading bot designed for Raspberry Pi
 
 ## 🛠️ Installation
 
-### Option 1: Quick Start (Recommended)
+### Quick Start
 
 ```bash
 # 1. Clone the repository
@@ -45,11 +46,15 @@ bash setup.sh
 sudo systemctl start omnibot-v2.5.service
 ```
 
-**That\'s it!** The bot will automatically start trading when the US market opens.
+**That\'s it!** The bot will:
+- Start trading when the US market opens
+- **Automatically update itself on weekends**
+- Preserve your API keys across updates
+- Never require manual intervention
 
-### Option 2: Detailed Installation
+### Detailed Installation
 
-If the quick start doesn\'t work, or you want to understand each step:
+If the quick start doesn\'t work:
 
 #### Step 1: Clone Repository
 ```bash
@@ -63,19 +68,15 @@ sudo apt update && sudo apt full-upgrade -y
 sudo apt install -y python3-venv python3-pip python3-dev build-essential \
     libopenblas-dev liblapack-dev gfortran postgresql libpq-dev \
     redis-server git vim htop tree tmux sqlite3 libsqlite3-dev \
-    pkg-config cmake libhdf5-dev openssl
+    pkg-config cmake libhdf5-dev openssl cron
 ```
 
 #### Step 3: Setup Database
 ```bash
-# Generate password
-openssl rand -base64 32
-
-# Create database
 sudo systemctl enable postgresql
 sudo systemctl start postgresql
 sudo -u postgres psql <<EOF
-CREATE USER biqu WITH PASSWORD 'YOUR_DB_PASSWORD_HERE';
+CREATE USER biqu WITH PASSWORD 'your_db_password';
 CREATE DATABASE omnibot_db OWNER biqu;
 GRANT ALL PRIVILEGES ON DATABASE omnibot_db TO biqu;
 \q
@@ -98,24 +99,26 @@ This will:
 - Install Python dependencies
 - **Prompt for Alpaca API keys** (only once)
 - Create systemd service
+- **Setup automated weekend updates**
 
-## 🔄 Updating
+## 🔄 Automated Updates
 
-### Regular Update (Preserves API Keys)
+OmniBot v2.5.1 **automatically updates itself** - no manual steps required!
+
+### How It Works
+
+1. **Bot detects weekend** (Saturday/Sunday or market closed)
+2. **Automatically pulls latest code** from GitHub
+3. **Preserves API keys** and configuration
+4. **Restarts with new code**
+5. **Logs all update activity**
+
+### Manual Update (if needed)
+
 ```bash
-cd ~/OmniBot
-git pull
-bash update.sh
+# Only if you want to force an update
+bash manual_update.sh
 ```
-
-### Weekend Update (Safe when market closed)
-```bash
-cd ~/OmniBot
-git pull
-bash weekend_update.sh
-```
-
-**Note:** Updates preserve your API keys in `.env`. You will NOT be asked for keys again.
 
 ## 🎯 Usage
 
@@ -144,13 +147,6 @@ python src/main.py --trades --days 7
 ### Export Trades
 ```bash
 python src/main.py --trades --export trades.csv
-```
-
-### Manual Setup (if needed)
-```bash
-# Only if you need to change API keys
-nano ~/omnibot/.env
-sudo systemctl restart omnibot-v2.5.service
 ```
 
 ## ⚙️ Configuration
@@ -192,100 +188,85 @@ omnibot/
 │   ├── config/          # Configuration management
 │   ├── data/            # Data clients (Yahoo Finance)
 │   ├── database/        # PostgreSQL models
-│   ├── ml/              # ML predictor & regime detection
+│   ├── ml/              # ML predictors
 │   ├── risk/            # Risk management
 │   ├── trading/         # Main trading engine
-│   ├── utils/           # Monitoring & utilities
-│   ├── gui/             # GUI placeholder
-│   ├── tests/           # Unit tests
+│   ├── utils/           # Utilities & auto-updater
+│   ├── auto_update.py   # Weekend auto-update module
 │   └── main.py          # Entry point
 ├── logs/                # Log files
 ├── data/                # Market data cache
-├── models/              # ML model storage
-├── backups/             # Database backups
+├── backups/             # Pre-update backups
 ├── requirements.txt     # Python dependencies
-├── .env                 # API keys (created by setup.sh)
-├── setup.sh             # Initial setup script
-├── update.sh            # Update script (preserves keys)
-├── weekend_update.sh    # Safe weekend update
-├── omnibot-v2.5.service # Systemd service file
+├── .env                 # API keys (created by setup)
+├── setup.sh             # Initial setup (one-time)
+├── manual_update.sh     # Force update (optional)
 └── README.md            # This file
 ```
 
 ## 🔧 Troubleshooting
 
-### Error: "unauthorized" when trading
-**Cause:** Invalid Alpaca API keys
-
-**Fix:**
+### Bot not updating automatically
+Check auto-update logs:
 ```bash
-# Check if keys are set
+tail -f ~/omnibot/logs/auto_update.log
+```
+
+### "unauthorized" when trading
+```bash
+# Check API keys
 cat ~/omnibot/.env | grep ALPACA
 
-# If empty or wrong, edit manually
+# Edit if needed
 nano ~/omnibot/.env
-
-# Then restart
 sudo systemctl restart omnibot-v2.5.service
 ```
 
-### Error: "ModuleNotFoundError: No module named 'talib'"
-**Fix:**
-```bash
-source ~/omnibot/venv/bin/activate
-pip install talib-binary
-sudo systemctl restart omnibot-v2.5.service
-```
-
-### Database Connection Errors
+### Database errors
 ```bash
 sudo systemctl status postgresql
 sudo systemctl start postgresql
-sudo -u postgres psql -c "\l" | grep omnibot_db
-```
-
-### Check Service Logs
-```bash
-sudo journalctl -u omnibot-v2.5.service -n 50
 ```
 
 ## 🛡️ Security Notes
 
 - **Never commit `.env` file** - it contains your API keys
-- **Keep your API keys secret** - they provide access to your trading account
-- **Use paper trading first** - always test thoroughly before live trading
-- **Secure your Raspberry Pi** - use strong passwords and keep it updated
-- **Regular backups** - backup your database and configuration
+- **API keys are preserved** during automatic updates
+- **Use paper trading first** - always test before live trading
+- **Secure your Raspberry Pi** - use strong passwords
 
 ## 📈 Performance Expectations
 
-- **Scan Interval**: 10 seconds (configurable)
-- **Latency**: ~100-500ms for order execution (paper trading)
+- **Scan Interval**: 10 seconds
+- **Update Check**: Every 4 hours during market hours, every 30 mins on weekends
+- **Auto-Update**: Only when market closed + new code available
 - **Positions**: Max 15% equity per position
-- **Risk**: 3% stop loss, 6% take profit per trade
-- **Trading Hours**: US Market (9:30 AM - 4:00 PM ET)
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
+- **Risk**: 3% stop loss, 6% take profit
 
 ## 📝 License
 
-Distributed under the MIT License. See `LICENSE` for more information.
+This project is licensed under the **Personal Use License**.
 
-## 🙏 Acknowledgments
+### What You CAN Do:
+- ✅ Use for your own personal trading
+- ✅ Modify for your own use
+- ✅ Share with friends for their personal use
+- ✅ Create backup copies
 
-- [Alpaca Markets](https://alpaca.markets/) for commission-free trading API
-- [TA-Lib](https://mrjbq7.github.io/ta-lib/) for technical indicators
-- [yfinance](https://github.com/ranaroussi/yfinance) for market data
+### What You CANNOT Do:
+- ❌ Sell the software
+- ❌ Use for commercial trading services
+- ❌ Remove copyright notices
+- ❌ Use to manage other people\'s money
+- ❌ Represent as your own work
+
+See [LICENSE](LICENSE) for full terms.
+
+**For commercial licensing inquiries**, contact: [your-email@example.com]
 
 ## ⚠️ Disclaimer
 
-**This software is for educational purposes only. Trading stocks involves substantial risk of loss. Past performance is not indicative of future results. Always use paper trading to test strategies before risking real capital.**
+**This software is for educational and personal use only. Trading stocks involves substantial risk of loss. Past performance is not indicative of future results. Always use paper trading to test strategies before risking real capital.**
 
 ---
 

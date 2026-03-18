@@ -1,12 +1,10 @@
 #!/usr/bin/env python3
 """
-OMNIBOT v3.0 - Monitoring (HTTP Disabled)
+OMNIBOT v2.5.1 - Monitoring (HTTP Disabled)
 """
 
 
 class Monitoring:
-    """Monitoring - HTTP server disabled to prevent errors"""
-
     def __init__(self, metrics_port=8080):
         pass
 

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-OMNIBOT v3.0 - Risk Management
+OMNIBOT v2.5.1 - Risk Management
 """
 from dataclasses import dataclass
 
@@ -12,8 +12,6 @@ class RiskProfile:
 
 
 class RiskManager:
-    """Risk manager"""
-
     def __init__(self, config=None):
         self.config = config or RiskProfile()
 

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-OMNIBOT v3.0 - Configuration
+OMNIBOT v2.5.1 - Configuration
 """
 from pydantic_settings import BaseSettings
 from pydantic import Field

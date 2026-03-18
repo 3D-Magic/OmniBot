@@ -1,21 +1,103 @@
-MIT License
+PERSONAL USE LICENSE
+
+Version 1.0, March 2026
 
 Copyright (c) 2026 OmniBot
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+1. DEFINITIONS
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+"Software" refers to the OmniBot v2.5.1 trading system, including all source code, 
+configuration files, documentation, and associated materials.
+
+"Personal Use" means use of the Software by an individual for their own personal 
+trading activities, not on behalf of any company, organization, or third party.
+
+"Commercial Use" means any use of the Software for monetary compensation, 
+including but not limited to: selling the Software, offering trading services 
+to others, using the Software to manage funds for others, or incorporating 
+the Software into a commercial product or service.
+
+2. GRANT OF LICENSE
+
+Subject to the terms and conditions of this License, the copyright holder hereby 
+grants you a limited, non-exclusive, non-transferable, royalty-free license to:
+
+(a) Use the Software for Personal Use only
+(b) Modify the Software for your own Personal Use
+(c) Create backup copies of the Software for your own use
+(d) Share the Software with others for their Personal Use, provided this 
+    license and all copyright notices are included
+
+3. RESTRICTIONS
+
+You may NOT, without prior written permission from the copyright holder:
+
+(a) Use the Software for Commercial Use
+(b) Sell, rent, lease, or sublicense the Software
+(c) Remove or alter any copyright notices or license terms
+(d) Use the Software to provide trading services to third parties
+(e) Use the Software in any way that violates applicable laws or regulations
+(f) Represent that the Software is your own original work
+
+4. MODIFICATIONS AND DERIVATIVE WORKS
+
+You may modify the Software for your own Personal Use. Any modifications or 
+derivative works:
+
+(a) Remain subject to this Personal Use License
+(b) Must retain all copyright notices
+(c) Must include a prominent notice that the work has been modified
+(d) May NOT be distributed for Commercial Use
+
+5. DISCLAIMER OF WARRANTY
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. 
+
+THE ENTIRE RISK AS TO THE QUALITY AND PERFORMANCE OF THE SOFTWARE IS WITH YOU. 
+SHOULD THE SOFTWARE PROVE DEFECTIVE, YOU ASSUME THE COST OF ALL NECESSARY 
+SERVICING, REPAIR OR CORRECTION.
+
+6. LIMITATION OF LIABILITY
+
+IN NO EVENT UNLESS REQUIRED BY APPLICABLE LAW OR AGREED TO IN WRITING WILL 
+ANY COPYRIGHT HOLDER BE LIABLE TO YOU FOR DAMAGES, INCLUDING ANY GENERAL, 
+SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES ARISING OUT OF THE USE OR 
+INABILITY TO USE THE SOFTWARE (INCLUDING BUT NOT LIMITED TO LOSS OF DATA 
+OR DATA BEING RENDERED INACCURATE OR LOSSES SUSTAINED BY YOU OR THIRD 
+PARTIES OR A FAILURE OF THE SOFTWARE TO OPERATE WITH ANY OTHER SOFTWARE), 
+EVEN IF SUCH HOLDER HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
+
+7. TRADING DISCLAIMER
+
+THE SOFTWARE IS FOR EDUCATIONAL AND PERSONAL USE ONLY. TRADING FINANCIAL 
+INSTRUMENTS INVOLVES SUBSTANTIAL RISK OF LOSS. PAST PERFORMANCE IS NOT 
+INDICATIVE OF FUTURE RESULTS. 
+
+YOU ACKNOWLEDGE THAT:
+(a) You are solely responsible for your trading decisions
+(b) The copyright holder is not responsible for any trading losses
+(c) You should consult with a qualified financial advisor before trading
+(d) Only trade with capital you can afford to lose
+
+8. TERMINATION
+
+This License automatically terminates if you fail to comply with any of its 
+terms and conditions. Upon termination, you must cease all use of the Software 
+and destroy all copies in your possession.
+
+9. GOVERNING LAW
+
+This License shall be governed by and construed in accordance with the laws 
+of the jurisdiction in which the copyright holder resides, without regard to 
+its conflict of law provisions.
+
+10. ACCEPTANCE
+
+By using, copying, or modifying the Software, you indicate your acceptance 
+of this Personal Use License and all its terms and conditions.
+
+For commercial licensing inquiries, contact: [your-email@example.com]

@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """
-OMNIBOT v3.0 - WORKING Trading Engine
+OMNIBOT v2.5.1 - WORKING Trading Engine
 Actually places trades using RSI + SMA strategy
+Includes automated weekend updates
 """
 import pandas as pd
 import numpy as np
@@ -10,6 +11,7 @@ from typing import Dict
 import signal
 import sys
 import time
+import threading
 
 sys.path.insert(0, '/home/biqu/omnibot/src')
 
@@ -33,12 +35,12 @@ class Position:
 
 
 class TradingEngineV25:
-    """WORKING Trading Engine - Actually trades!"""
+    """WORKING Trading Engine v2.5.1 - Actually trades!"""
 
     def __init__(self):
         print("="*70)
-        print("OMNIBOT v3.0 - WORKING TRADING ENGINE")
-        print("Strategy: RSI Mean Reversion + Trend Following")
+        print("OMNIBOT v2.5.1 - INTELLIGENT ADAPTIVE TRADING SYSTEM")
+        print("ML-Enhanced Multi-Strategy Execution")
         print("="*70)
 
         # Connect to Alpaca Trading
@@ -62,15 +64,37 @@ class TradingEngineV25:
         self.running = True
         signal.signal(signal.SIGINT, self._signal_handler)
 
+        # Auto-update settings
+        self.update_check_interval = 3600  # Check every hour
+        self.last_update_check = 0
+
         print("✓ Engine initialized")
         print(f"✓ Mode: {secure_settings.trading_mode.upper()}")
         print(f"✓ Symbols: {len(trading_config.symbols)}")
+        print("✓ Auto-update: Enabled (weekends only)")
         print()
 
     def _signal_handler(self, signum, frame):
         print("\nShutdown requested...")
         self.running = False
         sys.exit(0)
+
+    def check_for_updates(self):
+        """Check and perform auto-updates (weekends only)"""
+        try:
+            from auto_update import AutoUpdater
+            updater = AutoUpdater()
+
+            # Only check if enough time passed
+            if not updater.should_check_update():
+                return
+
+            # Run update check in background thread
+            update_thread = threading.Thread(target=updater.run, daemon=True)
+            update_thread.start()
+
+        except Exception as e:
+            print(f"[AUTO-UPDATE] Error: {e}")
 
     def get_data(self, symbol: str):
         """Get data from Yahoo Finance (free)"""
@@ -174,23 +198,38 @@ class TradingEngineV25:
                 self.enter_position(symbol, price)
 
     def trading_loop(self):
-        """Main trading loop"""
-        print("\nTRADING LOOP STARTED\n")
+        """Main trading loop with auto-update checks"""
+        print("\n" + "="*70)
+        print("TRADING LOOP STARTED")
+        print("Auto-update: Enabled (checks every hour)")
+        print("="*70 + "\n")
+
         scan_count = 0
+        last_update_check = 0
+
         while self.running:
             try:
                 scan_count += 1
+                now = time.time()
+
+                # Check for updates every hour
+                if now - last_update_check > self.update_check_interval:
+                    self.check_for_updates()
+                    last_update_check = now
+
                 print(f"\n--- Scan #{scan_count} ---")
                 for symbol in trading_config.symbols:
                     if not self.running:
                         break
                     self.scan_symbol(symbol)
                 time.sleep(10)
+
             except KeyboardInterrupt:
                 break
             except Exception as e:
                 print(f"[ERROR] {e}")
                 time.sleep(10)
+
         print("\nEngine stopped.")
 
     def start(self):
