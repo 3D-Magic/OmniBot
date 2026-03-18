@@ -1,141 +1,115 @@
 #!/bin/bash
-# OmniBot v2.5 Setup Script for Raspberry Pi
+# OMNIBOT v3.0 - Initial Setup Script
+# Only runs once to configure API keys
 
-set -e
-
-echo "=================================="
-echo "OmniBot v2.5 Setup Script"
-echo "=================================="
+echo "=========================================="
+echo "OMNIBOT v3.0 - Initial Setup"
+echo "=========================================="
 echo ""
 
-# Colors
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-NC='\033[0m' # No Color
-
-# Check if running as root
-if [[ $EUID -eq 0 ]]; then
-   echo "${RED}This script should not be run as root${NC}"
-   exit 1
+# Check if already configured
+if [ -f ~/omnibot/.env ]; then
+    echo "✓ Already configured (.env exists)"
+    echo "To reconfigure, delete ~/omnibot/.env and run again"
+    exit 0
 fi
 
-# Update system
-echo "${YELLOW}Step 1: Updating system...${NC}"
-sudo apt update && sudo apt full-upgrade -y
+# Stop service if running
+sudo systemctl stop omnibot-v2.5.service 2>/dev/null || true
 
-# Install system dependencies
-echo "${YELLOW}Step 2: Installing system dependencies...${NC}"
-sudo apt install -y python3-venv python3-pip python3-dev build-essential \
-    libopenblas-dev liblapack-dev gfortran postgresql libpq-dev \
-    redis-server git vim htop tree tmux sqlite3 libsqlite3-dev \
-    pkg-config cmake libhdf5-dev
-
-# Setup PostgreSQL
-echo "${YELLOW}Step 3: Setting up PostgreSQL...${NC}"
-sudo systemctl enable postgresql
-sudo systemctl start postgresql
-
-# Generate random password
-DB_PASSWORD=$(openssl rand -base64 32)
-echo "Generated database password: $DB_PASSWORD"
-echo "${YELLOW}Please save this password!${NC}"
-
-# Create database user and database
-sudo -u postgres psql <<EOF
-CREATE USER Omnibot WITH PASSWORD '$DB_PASSWORD';
-CREATE DATABASE omnibot_db OWNER Omnibot;
-GRANT ALL PRIVILEGES ON DATABASE omnibot_db TO Omnibot;
-\q
-EOF
-
-echo "${GREEN}✓ Database created${NC}"
-
-# Setup Redis
-echo "${YELLOW}Step 4: Setting up Redis...${NC}"
-sudo systemctl enable redis-server
-sudo systemctl start redis-server
-echo "${GREEN}✓ Redis started${NC}"
-
-# Create directory structure
-echo "${YELLOW}Step 5: Creating directory structure...${NC}"
+echo "Step 1/4: Creating directory structure..."
 mkdir -p ~/omnibot/{src/{config,data,database,ml,risk,trading,utils,gui,tests},logs,data,secrets,models,backups}
+
+echo "Step 2/4: Checking Python environment..."
 cd ~/omnibot
-echo "${GREEN}✓ Directories created${NC}"
-
-# Create virtual environment
-echo "${YELLOW}Step 6: Creating Python virtual environment...${NC}"
-python3 -m venv venv
+if [ ! -d "venv" ]; then
+    echo "Creating virtual environment..."
+    python3 -m venv venv
+fi
 source venv/bin/activate
-pip install --upgrade pip setuptools wheel
-echo "${GREEN}✓ Virtual environment created${NC}"
 
-# Install PyTorch (CPU version for Raspberry Pi)
-echo "${YELLOW}Step 7: Installing PyTorch (CPU)...${NC}"
-pip install torch torchvision --index-url https://download.pytorch.org/whl/cpu
-echo "${GREEN}✓ PyTorch installed${NC}"
+echo "Step 3/4: Installing dependencies..."
+pip install --upgrade pip -q
+pip install -r requirements.txt -q 2>/dev/null || pip install alpaca-py pandas numpy yfinance sqlalchemy psycopg2-binary pydantic-settings talib-binary -q
 
-# Copy source files
-echo "${YELLOW}Step 8: Copying source files...${NC}"
-# Note: Copy files from git clone directory to ~/omnibot
-cp -r src/* ~/omnibot/src/
-echo "${GREEN}✓ Source files copied${NC}"
+echo ""
+echo "Step 4/4: API Key Configuration"
+echo "----------------------------------------"
+echo "Get your API keys from: https://app.alpaca.markets/"
+echo ""
 
-# Install Python dependencies
-echo "${YELLOW}Step 9: Installing Python dependencies...${NC}"
-pip install -r requirements.txt
-echo "${GREEN}✓ Dependencies installed${NC}"
+read -p "Alpaca API Key: " alpaca_key
+read -p "Alpaca Secret Key: " alpaca_secret
+read -p "Database Password (or press Enter for auto-generate): " db_pass
 
-# Download NLTK data
-echo "${YELLOW}Step 10: Downloading NLTK data...${NC}"
-python -m nltk.downloader punkt vader_lexicon stopwords wordnet
-echo "${GREEN}✓ NLTK data downloaded${NC}"
+# Generate DB password if empty
+if [ -z "$db_pass" ]; then
+    db_pass=$(openssl rand -base64 16 | tr -dc 'a-zA-Z0-9' | head -c 16)
+    echo "Generated DB password: $db_pass"
+fi
 
-# Create .env file
-echo "${YELLOW}Step 11: Creating configuration file...${NC}"
-cat > ~/omnibot/.env <<EOF
-# OmniBot v2.5 Configuration
+echo ""
+echo "Creating configuration file..."
+
+cat > ~/omnibot/.env << EOF
+# OMNIBOT v3.0 Configuration
 # Generated: $(date -Iseconds)
 
-# API Keys (fill these in!)
-ALPACA_API_KEY_ENC=''
-ALPACA_SECRET_KEY_ENC=''
+# API Keys
+ALPACA_API_KEY_ENC='${alpaca_key}'
+ALPACA_SECRET_KEY_ENC='${alpaca_secret}'
 NEWSAPI_KEY_ENC=''
 POLYGON_KEY_ENC=''
 
 # Database
-DATABASE_URL='postgresql://Omnibot:$DB_PASSWORD@localhost:5432/omnibot_db'
+DATABASE_URL='postgresql://biqu:${db_pass}@localhost:5432/omnibot_db'
 REDIS_URL='redis://localhost:6379/0'
 
-# Trading Mode (paper/live/backtest)
+# Trading Mode (paper/live)
 TRADING_MODE='paper'
 
 # Paths
-MODEL_PATH='/home/Omnibot/omnibot/models'
-DATA_PATH='/home/Omnibot/omnibot/data'
+MODEL_PATH='/home/biqu/omnibot/models'
+DATA_PATH='/home/biqu/omnibot/data'
 EOF
 
 chmod 600 ~/omnibot/.env
-echo "${GREEN}✓ Configuration file created${NC}"
 
-# Install systemd service
-echo "${YELLOW}Step 12: Installing systemd service...${NC}"
-sudo cp omnibot-v2.5.service /etc/systemd/system/
-sudo chmod 644 /etc/systemd/system/omnibot-v2.5.service
+echo "✓ Configuration saved"
+echo ""
+
+# Setup systemd service
+echo "Installing systemd service..."
+sudo tee /etc/systemd/system/omnibot-v2.5.service > /dev/null << 'EOF'
+[Unit]
+Description=OMNIBOT v3.0 Working Trading System
+After=network.target
+
+[Service]
+Type=simple
+User=biqu
+Group=biqu
+WorkingDirectory=/home/biqu/omnibot/src
+Environment="PYTHONPATH=/home/biqu/omnibot/src"
+Environment="PYTHONUNBUFFERED=1"
+EnvironmentFile=/home/biqu/omnibot/.env
+ExecStart=/home/biqu/omnibot/venv/bin/python /home/biqu/omnibot/src/main.py
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
 sudo systemctl daemon-reload
 sudo systemctl enable omnibot-v2.5.service
-echo "${GREEN}✓ Service installed${NC}"
 
 echo ""
-echo "=================================="
-echo "${GREEN}Setup Complete!${NC}"
-echo "=================================="
+echo "=========================================="
+echo "✓ Setup Complete!"
+echo "=========================================="
 echo ""
-echo "Next steps:"
-echo "1. Get your Alpaca API keys from https://alpaca.markets"
-echo "2. Edit ~/omnibot/.env and add your API keys"
-echo "3. Run: python src/main.py --setup"
-echo "4. Start the bot: sudo systemctl start omnibot-v2.5.service"
-echo ""
-echo "Database password (save this!): $DB_PASSWORD"
+echo "Start trading: sudo systemctl start omnibot-v2.5.service"
+echo "View logs:     sudo journalctl -u omnibot-v2.5.service -f"
+echo "Check trades:  cd ~/omnibot && python src/main.py --trades"
 echo ""

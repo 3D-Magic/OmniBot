@@ -1,28 +1,27 @@
-# OmniBot v2.5 - Intelligent Adaptive Trading System
+# OmniBot v3.0 - Working Trading System
 
 [![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Alpaca](https://img.shields.io/badge/Alpaca-Paper%20Trading-green.svg)](https://alpaca.markets/)
 
-An ML-enhanced, multi-strategy algorithmic trading bot designed for Raspberry Pi 4, featuring deep learning market prediction, risk management, and automated paper trading.
+An ML-enhanced, multi-strategy algorithmic trading bot designed for Raspberry Pi 4, featuring RSI-based market signals, automated risk management, and paper trading.
 
 ## 🚀 Features
 
-- **ML-Powered Predictions**: LSTM neural networks for market direction forecasting
-- **Risk Management**: Position sizing, stop-loss (3%), and take-profit (6%) automation
+- **RSI-Based Trading**: Mean reversion strategy with RSI < 40 entry, RSI > 60 exit
+- **Risk Management**: Automatic 3% stop-loss and 6% take-profit
 - **Multi-Asset Support**: Trade 13 popular symbols (TQQQ, SOXL, TSLA, NVDA, etc.)
 - **Paper Trading**: Test strategies risk-free with Alpaca paper trading
 - **24/7 Operation**: Systemd service for automatic startup and monitoring
-- **Database Logging**: PostgreSQL/SQLite for trade history and analytics
-- **Market Regime Detection**: Adaptive strategies based on market conditions
+- **Weekend Updates**: Safe update mechanism that preserves API keys
 
 ## 📋 Requirements
 
 ### Hardware
 - Raspberry Pi 4 (4GB or 8GB RAM recommended)
 - MicroSD card (32GB or larger, Class 10)
-- Ethernet cable or WiFi connection
 - Power supply for Raspberry Pi
+- Ethernet cable or WiFi connection
 
 ### Software
 - Raspberry Pi OS (64-bit)
@@ -30,50 +29,44 @@ An ML-enhanced, multi-strategy algorithmic trading bot designed for Raspberry Pi
 - PostgreSQL 13+
 - Redis 6+
 
-## 🛠️ Quick Start (5 Steps)
+## 🛠️ Installation
 
-Get up and running in minutes:
+### Option 1: Quick Start (Recommended)
 
 ```bash
-# 1. Clone your repo
-git clone https://github.com/YOUR_USERNAME/omnibot-v2.5.git
-cd omnibot-v2.5
+# 1. Clone the repository
+git clone https://github.com/3D-Magic/OmniBot.git
+cd OmniBot
 
-# 2. Run automated setup
+# 2. Run automated setup (asks for API keys once)
 bash setup.sh
 
-# 3. Add your API keys
-nano ~/omnibot/.env
-
-# 4. Test the installation
-python test_system.py
-
-# 5. Start trading
+# 3. Start trading
 sudo systemctl start omnibot-v2.5.service
 ```
 
-**That's it!** The bot will automatically start trading when the US market opens (9:30 AM ET / 3:30 PM NZDT).
+**That\'s it!** The bot will automatically start trading when the US market opens.
 
-## 📊 Detailed Installation Guide
+### Option 2: Detailed Installation
 
-If the quick start doesn't work, or you want to understand each step:
+If the quick start doesn\'t work, or you want to understand each step:
 
-### Step 1: Clone Repository
+#### Step 1: Clone Repository
 ```bash
-git clone https://github.com/yourusername/omnibot-v2.5.git
-cd omnibot-v2.5
+git clone https://github.com/3D-Magic/OmniBot.git
+cd OmniBot
 ```
 
-### Step 2: Install System Dependencies
+#### Step 2: Install System Dependencies
 ```bash
 sudo apt update && sudo apt full-upgrade -y
 sudo apt install -y python3-venv python3-pip python3-dev build-essential \
     libopenblas-dev liblapack-dev gfortran postgresql libpq-dev \
     redis-server git vim htop tree tmux sqlite3 libsqlite3-dev \
-    pkg-config cmake libhdf5-dev
+    pkg-config cmake libhdf5-dev openssl
 ```
 
-### Step 3: Setup Database
+#### Step 3: Setup Database
 ```bash
 # Generate password
 openssl rand -base64 32
@@ -82,59 +75,47 @@ openssl rand -base64 32
 sudo systemctl enable postgresql
 sudo systemctl start postgresql
 sudo -u postgres psql <<EOF
-CREATE USER Omnibot WITH PASSWORD 'YOUR_DB_PASSWORD_HERE';
-CREATE DATABASE omnibot_db OWNER Omnibot;
-GRANT ALL PRIVILEGES ON DATABASE omnibot_db TO Omnibot;
+CREATE USER biqu WITH PASSWORD 'YOUR_DB_PASSWORD_HERE';
+CREATE DATABASE omnibot_db OWNER biqu;
+GRANT ALL PRIVILEGES ON DATABASE omnibot_db TO biqu;
 \q
 EOF
 ```
 
-### Step 4: Setup Redis
+#### Step 4: Setup Redis
 ```bash
 sudo systemctl enable redis-server
 sudo systemctl start redis-server
 ```
 
-### Step 5: Create Directory Structure
+#### Step 5: Run Setup Script
 ```bash
-mkdir -p ~/omnibot/{src/{config,data,database,ml,risk,trading,utils,gui,tests},logs,data,secrets,models,backups}
-cd ~/omnibot
+bash setup.sh
 ```
 
-### Step 6: Install Python Dependencies
+This will:
+- Create directory structure
+- Install Python dependencies
+- **Prompt for Alpaca API keys** (only once)
+- Create systemd service
+
+## 🔄 Updating
+
+### Regular Update (Preserves API Keys)
 ```bash
-python3 -m venv venv
-source venv/bin/activate
-pip install --upgrade pip setuptools wheel
-pip install torch torchvision --index-url https://download.pytorch.org/whl/cpu
-pip install -r requirements.txt
-python -m nltk.downloader punkt vader_lexicon stopwords wordnet
+cd ~/OmniBot
+git pull
+bash update.sh
 ```
 
-### Step 7: Configure API Keys
+### Weekend Update (Safe when market closed)
 ```bash
-# Copy example config
-cp .env.example .env
-
-# Edit with your keys
-nano .env
+cd ~/OmniBot
+git pull
+bash weekend_update.sh
 ```
 
-Fill in your Alpaca API keys from [https://alpaca.markets](https://alpaca.markets)
-
-### Step 8: Copy Source Files
-```bash
-cp -r src/* ~/omnibot/src/
-```
-
-### Step 9: Install Systemd Service
-```bash
-sudo cp omnibot-v2.5.service /etc/systemd/system/
-sudo chmod 644 /etc/systemd/system/omnibot-v2.5.service
-sudo systemctl daemon-reload
-sudo systemctl enable omnibot-v2.5.service
-sudo systemctl start omnibot-v2.5.service
-```
+**Note:** Updates preserve your API keys in `.env`. You will NOT be asked for keys again.
 
 ## 🎯 Usage
 
@@ -167,7 +148,9 @@ python src/main.py --trades --export trades.csv
 
 ### Manual Setup (if needed)
 ```bash
-python src/main.py --setup
+# Only if you need to change API keys
+nano ~/omnibot/.env
+sudo systemctl restart omnibot-v2.5.service
 ```
 
 ## ⚙️ Configuration
@@ -191,9 +174,14 @@ market_open_only: bool = True   # Only trade during market hours
 ### Switch to Live Trading
 ⚠️ **WARNING**: Only switch after thorough paper testing!
 
-Edit `.env`:
+Edit `~/omnibot/.env`:
 ```bash
 TRADING_MODE='live'
+```
+
+Then restart:
+```bash
+sudo systemctl restart omnibot-v2.5.service
 ```
 
 ## 📊 Project Structure
@@ -202,9 +190,9 @@ TRADING_MODE='live'
 omnibot/
 ├── src/
 │   ├── config/          # Configuration management
-│   ├── data/            # Data clients (Alpaca, Yahoo)
-│   ├── database/        # PostgreSQL/SQLite models
-│   ├── ml/              # LSTM predictor & regime detection
+│   ├── data/            # Data clients (Yahoo Finance)
+│   ├── database/        # PostgreSQL models
+│   ├── ml/              # ML predictor & regime detection
 │   ├── risk/            # Risk management
 │   ├── trading/         # Main trading engine
 │   ├── utils/           # Monitoring & utilities
@@ -216,23 +204,36 @@ omnibot/
 ├── models/              # ML model storage
 ├── backups/             # Database backups
 ├── requirements.txt     # Python dependencies
-├── .env.example         # Environment template
+├── .env                 # API keys (created by setup.sh)
+├── setup.sh             # Initial setup script
+├── update.sh            # Update script (preserves keys)
+├── weekend_update.sh    # Safe weekend update
 ├── omnibot-v2.5.service # Systemd service file
 └── README.md            # This file
 ```
 
 ## 🔧 Troubleshooting
 
-### Error: "asyncio not defined"
-**Fix**: Already fixed in v2.5 - `import asyncio` added to engine.py
+### Error: "unauthorized" when trading
+**Cause:** Invalid Alpaca API keys
 
-### Error: "coroutine never awaited"
-**Fix**: Websocket streaming disabled, using REST polling instead
+**Fix:**
+```bash
+# Check if keys are set
+cat ~/omnibot/.env | grep ALPACA
 
-### Error: "ModuleNotFoundError: No module named 'hmmlearn'"
+# If empty or wrong, edit manually
+nano ~/omnibot/.env
+
+# Then restart
+sudo systemctl restart omnibot-v2.5.service
+```
+
+### Error: "ModuleNotFoundError: No module named 'talib'"
+**Fix:**
 ```bash
 source ~/omnibot/venv/bin/activate
-pip install hmmlearn
+pip install talib-binary
 sudo systemctl restart omnibot-v2.5.service
 ```
 
@@ -251,9 +252,9 @@ sudo journalctl -u omnibot-v2.5.service -n 50
 ## 🛡️ Security Notes
 
 - **Never commit `.env` file** - it contains your API keys
+- **Keep your API keys secret** - they provide access to your trading account
 - **Use paper trading first** - always test thoroughly before live trading
 - **Secure your Raspberry Pi** - use strong passwords and keep it updated
-- **API keys provide account access** - treat them like passwords
 - **Regular backups** - backup your database and configuration
 
 ## 📈 Performance Expectations
@@ -279,8 +280,8 @@ Distributed under the MIT License. See `LICENSE` for more information.
 ## 🙏 Acknowledgments
 
 - [Alpaca Markets](https://alpaca.markets/) for commission-free trading API
-- [PyTorch](https://pytorch.org/) for deep learning framework
-- [SQLAlchemy](https://www.sqlalchemy.org/) for database ORM
+- [TA-Lib](https://mrjbq7.github.io/ta-lib/) for technical indicators
+- [yfinance](https://github.com/ranaroussi/yfinance) for market data
 
 ## ⚠️ Disclaimer
 
