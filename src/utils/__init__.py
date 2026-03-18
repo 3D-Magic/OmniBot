@@ -1,1 +1,1 @@
-from .monitoring import monitor, Monitoring
+from .monitoring import monitor

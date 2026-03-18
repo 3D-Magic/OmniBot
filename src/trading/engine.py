@@ -1,16 +1,16 @@
 #!/usr/bin/env python3
 """
-OMNIBOT v2.5.1 - WORKING Trading Engine
-Actually places trades using RSI + SMA strategy
-Includes automated weekend updates
+OMNIBOT v2.5.1 - Multi-Market Trading Engine
+Supports: US Stocks, Asia Stocks, Forex
 """
 import pandas as pd
 import numpy as np
-from datetime import datetime
-from typing import Dict
+from datetime import datetime, time
+from typing import Dict, List, Optional
 import signal
 import sys
 import time
+import pytz
 import threading
 
 sys.path.insert(0, '/home/biqu/omnibot/src')
@@ -23,55 +23,92 @@ import yfinance as yf
 import talib
 
 
+# MARKET CONFIGURATION
+MARKETS = {
+    'US': {
+        'name': 'US Stocks',
+        'timezone': 'America/New_York',
+        'open': time(9, 30),
+        'close': time(16, 0),
+        'symbols': ['TQQQ', 'SOXL', 'TSLA', 'NVDA', 'AMD', 'AAPL', 'MSFT', 
+                    'AMZN', 'GOOGL', 'META', 'SPY', 'QQQ', 'IWM'],
+        'enabled': True
+    },
+    'JP': {
+        'name': 'Tokyo Stock Exchange',
+        'timezone': 'Asia/Tokyo',
+        'open': time(9, 0),
+        'close': time(15, 0),
+        'symbols': ['7203.T', '6758.T', '9984.T', '6861.T', '7974.T'],
+        'enabled': True
+    },
+    'HK': {
+        'name': 'Hong Kong Exchange',
+        'timezone': 'Asia/Hong_Kong',
+        'open': time(9, 30),
+        'close': time(16, 0),
+        'symbols': ['0700.HK', '3690.HK', '9988.HK', '2318.HK', '1299.HK'],
+        'enabled': True
+    },
+    'FOREX': {
+        'name': 'Currency Trading',
+        'timezone': 'UTC',  # Forex trades 24/5
+        'open': time(0, 0),  # Sunday 5pm ET
+        'close': time(23, 59),  # Friday 5pm ET
+        'symbols': ['EURUSD=X', 'GBPUSD=X', 'USDJPY=X', 'AUDUSD=X', 
+                    'USDCAD=X', 'USDCHF=X', 'NZDUSD=X', 'EURGBP=X'],
+        'enabled': True,
+        'is_24h': True  # Special flag for 24-hour market
+    }
+}
+
+
 class Position:
     """Track open position"""
-    def __init__(self, symbol, qty, entry_price):
+    def __init__(self, symbol, qty, entry_price, market='US'):
         self.symbol = symbol
         self.qty = qty
         self.entry_price = entry_price
+        self.market = market
         self.entry_time = datetime.now()
         self.stop_loss = entry_price * 0.97  # -3%
         self.take_profit = entry_price * 1.06  # +6%
 
 
-class TradingEngineV25:
-    """WORKING Trading Engine v2.5.1 - Actually trades!"""
+class MultiMarketEngine:
+    """Multi-market trading engine - US, Asia, Forex"""
 
     def __init__(self):
         print("="*70)
-        print("OMNIBOT v2.5.1 - INTELLIGENT ADAPTIVE TRADING SYSTEM")
-        print("ML-Enhanced Multi-Strategy Execution")
+        print("OMNIBOT v2.5.1 - MULTI-MARKET TRADING SYSTEM")
+        print("US Stocks | Asia Stocks | Forex")
         print("="*70)
 
-        # Connect to Alpaca Trading
+        # Connect to Alpaca
         self.trading_client = TradingClient(
             secure_settings.alpaca_api_key,
             secure_settings.alpaca_secret_key,
             paper=(secure_settings.trading_mode == 'paper')
         )
 
-        # Track positions
+        # Track positions by market
         self.positions: Dict[str, Position] = {}
 
         # Strategy parameters
-        self.rsi_period = 14
-        self.rsi_entry = 40      # Enter when RSI < 40
-        self.rsi_exit = 60       # Exit when RSI > 60
-        self.stoploss_pct = 0.03
-        self.takeprofit_pct = 0.06
-
-        # Running flag
+        self.rsi_entry = 40
+        self.rsi_exit = 60
         self.running = True
         signal.signal(signal.SIGINT, self._signal_handler)
 
-        # Auto-update settings
-        self.update_check_interval = 3600  # Check every hour
-        self.last_update_check = 0
-
         print("✓ Engine initialized")
         print(f"✓ Mode: {secure_settings.trading_mode.upper()}")
-        print(f"✓ Symbols: {len(trading_config.symbols)}")
-        print("✓ Auto-update: Enabled (weekends only)")
+
+        # Show market status
+        for market_id, config in MARKETS.items():
+            if config['enabled']:
+                is_open = self.is_market_open(market_id)
+                status = "🟢 OPEN" if is_open else "🔴 CLOSED"
+                print(f"✓ {config['name']}: {status}")
         print()
 
     def _signal_handler(self, signum, frame):
@@ -79,30 +116,49 @@ class TradingEngineV25:
         self.running = False
         sys.exit(0)
 
-    def check_for_updates(self):
-        """Check and perform auto-updates (weekends only)"""
-        try:
-            from auto_update import AutoUpdater
-            updater = AutoUpdater()
+    def is_market_open(self, market_id: str) -> bool:
+        """Check if a specific market is currently open"""
+        config = MARKETS.get(market_id)
+        if not config or not config['enabled']:
+            return False
 
-            # Only check if enough time passed
-            if not updater.should_check_update():
-                return
+        # Get current time in market's timezone
+        tz = pytz.timezone(config['timezone'])
+        now = datetime.now(tz)
+        current_time = now.time()
 
-            # Run update check in background thread
-            update_thread = threading.Thread(target=updater.run, daemon=True)
-            update_thread.start()
+        # Forex is 24/5 (closed weekends)
+        if config.get('is_24h'):
+            return now.weekday() < 5  # Mon-Fri only
 
-        except Exception as e:
-            print(f"[AUTO-UPDATE] Error: {e}")
+        # Regular market hours
+        market_open = config['open']
+        market_close = config['close']
 
-    def get_data(self, symbol: str):
-        """Get data from Yahoo Finance (free)"""
+        # Check if weekday (most markets closed Sat/Sun)
+        if now.weekday() >= 5:
+            return False
+
+        return market_open <= current_time <= market_close
+
+    def get_active_markets(self) -> List[str]:
+        """Get list of currently open markets"""
+        return [m for m in MARKETS if self.is_market_open(m)]
+
+    def get_data(self, symbol: str, market: str = 'US'):
+        """Get market data with timezone awareness"""
         try:
             ticker = yf.Ticker(symbol)
-            df = ticker.history(period="3d", interval="5m")
+
+            # Different data periods for different markets
+            if market == 'FOREX':
+                df = ticker.history(period="1d", interval="5m")
+            else:
+                df = ticker.history(period="3d", interval="5m")
+
             if df.empty:
                 return None
+
             df = df.rename(columns={
                 'Open': 'open', 'High': 'high', 'Low': 'low',
                 'Close': 'close', 'Volume': 'volume'
@@ -113,7 +169,7 @@ class TradingEngineV25:
 
     def calculate_indicators(self, df):
         """Calculate RSI and SMA"""
-        df['rsi'] = talib.RSI(df['close'], timeperiod=self.rsi_period)
+        df['rsi'] = talib.RSI(df['close'], timeperiod=14)
         df['sma20'] = talib.SMA(df['close'], timeperiod=20)
         return df
 
@@ -138,12 +194,21 @@ class TradingEngineV25:
             return True, f"RSI Exit ({rsi:.1f})"
         return False, "Hold"
 
-    def enter_position(self, symbol, price):
-        """Enter a long position"""
+    def enter_position(self, symbol, price, market='US'):
+        """Enter a position"""
         try:
             account = self.trading_client.get_account()
             equity = float(account.equity)
-            qty = int((equity * 0.15) / price)
+
+            # Split equity across active markets
+            active_markets = len(self.get_active_markets())
+            if active_markets == 0:
+                active_markets = 1
+
+            # Position size: 15% per position, divided by active markets
+            position_value = (equity * 0.15) / active_markets
+            qty = int(position_value / price)
+
             if qty < 1:
                 return False
 
@@ -152,8 +217,10 @@ class TradingEngineV25:
                 time_in_force=TimeInForce.DAY
             )
             self.trading_client.submit_order(order)
-            self.positions[symbol] = Position(symbol, qty, price)
-            print(f"🟢 [ENTRY] {symbol}: Bought {qty} shares @ ${price:.2f}")
+            self.positions[symbol] = Position(symbol, qty, price, market)
+
+            market_name = MARKETS[market]['name']
+            print(f"🟢 [ENTRY] [{market}] {symbol}: Bought {qty} @ ${price:.2f}")
             return True
         except Exception as e:
             print(f"[ERROR] {symbol}: {e}")
@@ -168,60 +235,77 @@ class TradingEngineV25:
                 time_in_force=TimeInForce.DAY
             )
             self.trading_client.submit_order(order)
+
             pnl = (price - pos.entry_price) * pos.qty
             pnl_pct = ((price - pos.entry_price) / pos.entry_price) * 100
-            print(f"🔴 [EXIT] {symbol}: Sold {pos.qty} shares @ ${price:.2f}")
+
+            print(f"🔴 [EXIT] [{pos.market}] {symbol}: Sold {pos.qty} @ ${price:.2f}")
             print(f"   Reason: {reason} | P&L: ${pnl:+.2f} ({pnl_pct:+.2f}%)")
             del self.positions[symbol]
             return True
         except Exception as e:
             return False
 
-    def scan_symbol(self, symbol):
-        """Scan a single symbol"""
-        df = self.get_data(symbol)
-        if df is None or len(df) < 20:
+    def scan_market(self, market_id: str):
+        """Scan all symbols in a specific market"""
+        if not self.is_market_open(market_id):
             return
-        df = self.calculate_indicators(df)
-        price = df['close'].iloc[-1]
-        rsi = df['rsi'].iloc[-1]
 
-        if symbol in self.positions:
-            should_exit, reason = self.check_exit(df, self.positions[symbol])
-            print(f"[{symbol}] ${price:.2f} | RSI: {rsi:.1f} | {reason}")
-            if should_exit:
-                self.exit_position(symbol, price, reason)
-        else:
-            should_enter, info = self.check_entry(df)
-            print(f"[{symbol}] ${price:.2f} | RSI: {info.get('rsi', 0):.1f} | Enter: {should_enter}")
-            if should_enter:
-                self.enter_position(symbol, price)
+        config = MARKETS[market_id]
+
+        for symbol in config['symbols']:
+            if not self.running:
+                break
+
+            df = self.get_data(symbol, market_id)
+            if df is None or len(df) < 20:
+                continue
+
+            df = self.calculate_indicators(df)
+            price = df['close'].iloc[-1]
+            rsi = df['rsi'].iloc[-1]
+
+            # Check if we have a position
+            if symbol in self.positions:
+                should_exit, reason = self.check_exit(df, self.positions[symbol])
+                print(f"[{market_id}] {symbol} ${price:.2f} RSI:{rsi:.1f} | {reason}")
+                if should_exit:
+                    self.exit_position(symbol, price, reason)
+            else:
+                # Check entry
+                should_enter, info = self.check_entry(df)
+                print(f"[{market_id}] {symbol} ${price:.2f} RSI:{info.get('rsi', 0):.1f} | Enter:{should_enter}")
+                if should_enter:
+                    self.enter_position(symbol, price, market_id)
 
     def trading_loop(self):
-        """Main trading loop with auto-update checks"""
+        """Main trading loop - scans all active markets"""
         print("\n" + "="*70)
         print("TRADING LOOP STARTED")
-        print("Auto-update: Enabled (checks every hour)")
+        print("Scanning all active markets every 10 seconds")
         print("="*70 + "\n")
 
         scan_count = 0
-        last_update_check = 0
 
         while self.running:
             try:
                 scan_count += 1
-                now = time.time()
+                active_markets = self.get_active_markets()
 
-                # Check for updates every hour
-                if now - last_update_check > self.update_check_interval:
-                    self.check_for_updates()
-                    last_update_check = now
+                print(f"\n--- Scan #{scan_count} | Active Markets: {', '.join(active_markets) or 'NONE'} ---")
 
-                print(f"\n--- Scan #{scan_count} ---")
-                for symbol in trading_config.symbols:
+                # Scan each active market
+                for market_id in active_markets:
                     if not self.running:
                         break
-                    self.scan_symbol(symbol)
+                    self.scan_market(market_id)
+
+                # If no markets open, wait and show status
+                if not active_markets:
+                    next_market = self.get_next_market_open()
+                    if next_market:
+                        print(f"⏳ All markets closed. Next: {next_market}")
+
                 time.sleep(10)
 
             except KeyboardInterrupt:
@@ -232,6 +316,17 @@ class TradingEngineV25:
 
         print("\nEngine stopped.")
 
+    def get_next_market_open(self) -> Optional[str]:
+        """Get info about next market to open"""
+        now = datetime.now(pytz.UTC)
+
+        for market_id, config in MARKETS.items():
+            if not config['enabled']:
+                continue
+            # Simplified - just return first enabled market
+            return f"{config['name']} at {config['open']} {config['timezone']}"
+        return None
+
     def start(self):
         self.trading_loop()
 
@@ -239,4 +334,6 @@ class TradingEngineV25:
         self.running = False
 
 
-TradingEngine = TradingEngineV25
+# Backward compatibility
+TradingEngineV25 = MultiMarketEngine
+TradingEngine = MultiMarketEngine
