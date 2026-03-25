@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OMNIBOT v2.6 Sentinel - Dashboard</title>
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            min-height: 100vh;
+            color: #fff;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        header {
+            text-align: center;
+            padding: 30px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.2);
+            margin-bottom: 30px;
+        }
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        .version {
+            color: rgba(255,255,255,0.7);
+            font-size: 0.9em;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .card {
+            background: rgba(255,255,255,0.1);
+            border-radius: 15px;
+            padding: 25px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        .card h2 {
+            margin-bottom: 15px;
+            font-size: 1.3em;
+            color: #fff;
+        }
+        .status {
+            display: inline-block;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 0.9em;
+        }
+        .status.running { background: #00d26a; color: #000; }
+        .status.stopped { background: #ff4757; color: #fff; }
+        .btn {
+            display: inline-block;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: bold;
+            transition: all 0.3s;
+            margin: 5px;
+        }
+        .btn-primary {
+            background: #00d26a;
+            color: #000;
+        }
+        .btn-danger {
+            background: #ff4757;
+            color: #fff;
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+        .ngrok-section {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid rgba(255,255,255,0.2);
+        }
+        .ngrok-url {
+            background: rgba(0,0,0,0.3);
+            padding: 10px;
+            border-radius: 5px;
+            font-family: monospace;
+            word-break: break-all;
+            margin: 10px 0;
+        }
+        .ngrok-status {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 0.8em;
+            margin-left: 10px;
+        }
+        .ngrok-status.connected { background: #00d26a; color: #000; }
+        .ngrok-status.disconnected { background: #ff4757; color: #fff; }
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+        .stat-item {
+            background: rgba(0,0,0,0.2);
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+        }
+        .stat-value {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #00d26a;
+        }
+        .stat-label {
+            font-size: 0.9em;
+            color: rgba(255,255,255,0.7);
+            margin-top: 5px;
+        }
+        .footer {
+            text-align: center;
+            padding: 20px;
+            color: rgba(255,255,255,0.5);
+            font-size: 0.9em;
+        }
+        .logout {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            color: #fff;
+            text-decoration: none;
+            opacity: 0.7;
+        }
+        .logout:hover { opacity: 1; }
+        @media (max-width: 768px) {
+            h1 { font-size: 1.8em; }
+            .grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <a href="/logout" class="logout">Logout</a>
+    <div class="container">
+        <header>
+            <h1>🤖 OMNIBOT Dashboard</h1>
+            <div class="version">v{{ version }} {{ version_name }} | Raspberry Pi Optimized</div>
+        </header>
+
+        <div class="grid">
+            <div class="card">
+                <h2>Bot Status</h2>
+                <div id="status-container">
+                    <span class="status stopped" id="bot-status">Stopped</span>
+                </div>
+                <div style="margin-top: 20px;">
+                    <button class="btn btn-primary" onclick="startBot()">▶ Start</button>
+                    <button class="btn btn-danger" onclick="stopBot()">⏹ Stop</button>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>External Access (ngrok)</h2>
+                <div class="ngrok-section">
+                    <div id="ngrok-container">
+                        <span class="ngrok-status disconnected" id="ngrok-status">Disconnected</span>
+                    </div>
+                    <div id="ngrok-url-container" style="display: none;">
+                        <div class="ngrok-url" id="ngrok-url"></div>
+                    </div>
+                    <div style="margin-top: 15px;">
+                        <button class="btn btn-primary" onclick="startNgrok()">🌐 Start ngrok</button>
+                        <button class="btn btn-danger" onclick="stopNgrok()">⏹ Stop ngrok</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>Portfolio Overview</h2>
+                <div class="stats">
+                    <div class="stat-item">
+                        <div class="stat-value" id="portfolio-value">$0.00</div>
+                        <div class="stat-label">Portfolio Value</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="positions-count">0</div>
+                        <div class="stat-label">Open Positions</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="daily-pnl">0.00%</div>
+                        <div class="stat-label">Daily P&L</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="win-rate">0%</div>
+                        <div class="stat-label">Win Rate</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>Quick Actions</h2>
+                <div style="display: flex; flex-wrap: wrap; gap: 10px;">
+                    <button class="btn btn-primary" onclick="emergencyStop()">🚨 Emergency Stop</button>
+                    <button class="btn btn-primary" onclick="refreshData()">🔄 Refresh</button>
+                    <button class="btn btn-primary" onclick="viewLogs()">📄 View Logs</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>OMNIBOT v2.6 Sentinel | Zero Cost | Open Source | ML-Enhanced Trading</p>
+            <p style="margin-top: 10px; font-size: 0.8em;">⚠️ Trading involves risk. This is for educational purposes only.</p>
+        </div>
+    </div>
+
+    <script>
+        const socket = io();
+
+        socket.on('connect', function() {
+            console.log('Connected to OMNIBOT');
+        });
+
+        socket.on('status_update', function(data) {
+            updateStatus(data);
+        });
+
+        socket.on('ngrok_update', function(data) {
+            updateNgrok(data);
+        });
+
+        function updateStatus(data) {
+            const statusEl = document.getElementById('bot-status');
+            if (data.running) {
+                statusEl.textContent = 'Running (' + data.mode + ')';
+                statusEl.className = 'status running';
+            } else {
+                statusEl.textContent = 'Stopped';
+                statusEl.className = 'status stopped';
+            }
+
+            document.getElementById('portfolio-value').textContent = 
+                '$' + (data.portfolio_value || 0).toFixed(2);
+            document.getElementById('positions-count').textContent = 
+                (data.positions || []).length;
+        }
+
+        function updateNgrok(data) {
+            const statusEl = document.getElementById('ngrok-status');
+            const urlContainer = document.getElementById('ngrok-url-container');
+            const urlEl = document.getElementById('ngrok-url');
+
+            if (data.url) {
+                statusEl.textContent = 'Connected';
+                statusEl.className = 'ngrok-status connected';
+                urlEl.textContent = data.url;
+                urlContainer.style.display = 'block';
+            } else {
+                statusEl.textContent = 'Disconnected';
+                statusEl.className = 'ngrok-status disconnected';
+                urlContainer.style.display = 'none';
+            }
+        }
+
+        function startBot() {
+            fetch('/api/start', {method: 'POST'})
+                .then(r => r.json())
+                .then(data => {
+                    if (data.success) alert('Bot started!');
+                });
+        }
+
+        function stopBot() {
+            fetch('/api/stop', {method: 'POST'})
+                .then(r => r.json())
+                .then(data => {
+                    if (data.success) alert('Bot stopped!');
+                });
+        }
+
+        function startNgrok() {
+            fetch('/api/ngrok/start', {method: 'POST'})
+                .then(r => r.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('ngrok started! URL: ' + data.url);
+                    } else {
+                        alert('Failed: ' + data.error);
+                    }
+                });
+        }
+
+        function stopNgrok() {
+            fetch('/api/ngrok/stop', {method: 'POST'})
+                .then(r => r.json())
+                .then(data => {
+                    if (data.success) alert('ngrok stopped!');
+                });
+        }
+
+        function emergencyStop() {
+            if (confirm('EMERGENCY STOP: This will immediately stop all trading. Continue?')) {
+                stopBot();
+            }
+        }
+
+        function refreshData() {
+            fetch('/api/status')
+                .then(r => r.json())
+                .then(data => updateStatus(data));
+        }
+
+        function viewLogs() {
+            alert('Logs view not implemented in this version');
+        }
+
+        // Initial load
+        refreshData();
+    </script>
+</body>
+</html>

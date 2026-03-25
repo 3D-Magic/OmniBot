@@ -1,0 +1,15 @@
+[Unit]
+Description=OMNIBOT v2.6 Sentinel Trading Bot
+After=network.target
+
+[Service]
+Type=simple
+User=omnibot
+WorkingDirectory=/home/omnibot/OmniBot
+Environment=PATH=/home/omnibot/OmniBot/venv/bin
+ExecStart=/home/omnibot/OmniBot/venv/bin/python src/main.py --mode trading
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target

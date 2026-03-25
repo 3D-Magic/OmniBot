@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OMNIBOT - Login</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .login-box {
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 20px;
+            padding: 40px;
+            width: 90%;
+            max-width: 400px;
+            text-align: center;
+        }
+        h1 {
+            color: #fff;
+            margin-bottom: 10px;
+            font-size: 2em;
+        }
+        .subtitle {
+            color: rgba(255,255,255,0.7);
+            margin-bottom: 30px;
+        }
+        input[type="password"] {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 10px;
+            background: rgba(0,0,0,0.3);
+            color: #fff;
+            font-size: 1em;
+            margin-bottom: 20px;
+        }
+        input[type="password"]::placeholder {
+            color: rgba(255,255,255,0.5);
+        }
+        button {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 10px;
+            background: #00d26a;
+            color: #000;
+            font-size: 1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        button:hover {
+            background: #00ff7f;
+            transform: translateY(-2px);
+        }
+        .error {
+            color: #ff4757;
+            margin-bottom: 15px;
+        }
+        .hint {
+            color: rgba(255,255,255,0.5);
+            font-size: 0.8em;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-box">
+        <h1>🤖 OMNIBOT</h1>
+        <div class="subtitle">v2.6 Sentinel</div>
+
+        {% if error %}
+        <div class="error">{{ error }}</div>
+        {% endif %}
+
+        <form method="POST">
+            <input type="password" name="password" placeholder="Enter password" autofocus>
+            <button type="submit">Login</button>
+        </form>
+
+        <div class="hint">Default password: admin</div>
+    </div>
+</body>
+</html>
